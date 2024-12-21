@@ -79,11 +79,12 @@ export class UserPoolStack extends cdk.Stack {
             zoneName,
         });
 
-        const domainName: string = zoneName
+        const domainPrefix = 'odmd-sandbox';
+        const domainName: string = domainPrefix + '.' + zoneName
 
         const domain = userPool.addDomain('AuthDomain', {
             cognitoDomain: {
-                domainPrefix: 'odmd-sandbox',
+                domainPrefix,
             },
             customDomain: {
                 domainName,
