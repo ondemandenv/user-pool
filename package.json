@@ -13,9 +13,10 @@
     "cdk-sa": "cross-env ODMD_build_id=LlmChatLambdaS3 ODMD_rev_ref=b..main cdk synth * --profile sandbox-workspace1"
   },
   "devDependencies": {
-    "@ondemandenv/odmd-contracts-sandbox": "0.0.47",
+    "@ondemandenv/odmd-contracts-sandbox": "0.0.48",
     "@types/jest": "^29.5.14",
     "@types/node": "22.7.9",
+    "cross-env": "^7.0.3",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",
     "aws-cdk": "2.173.2",
