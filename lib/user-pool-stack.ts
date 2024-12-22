@@ -100,7 +100,7 @@ export class UserPoolStack extends cdk.Stack {
 
         new ARecord(this, 'CognitoDomainARecord', {
             zone: hostedZone,
-            recordName: 'auth',
+            recordName: domainName,
             target: RecordTarget.fromAlias(
                 new UserPoolDomainTarget(domain)
             )
