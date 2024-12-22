@@ -13,7 +13,7 @@
     "cdk-sa": "cross-env ODMD_build_id=CognitoUserPool ODMD_rev_ref=b..main cdk synth * --profile sandbox-workspace1"
   },
   "devDependencies": {
-    "@ondemandenv/odmd-contracts-sandbox": "0.0.48",
+    "@ondemandenv/odmd-contracts-sandbox": "0.0.49",
     "@types/jest": "^29.5.14",
     "@types/node": "22.7.9",
     "cross-env": "^7.0.3",
