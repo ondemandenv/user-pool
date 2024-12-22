@@ -60,7 +60,7 @@ export class UserPoolStack extends cdk.Stack {
         oauthUserpoolClient.node.addDependency(new UserPoolIdentityProviderGoogle(this, 'GoogleProvider', {
             userPool,
             clientId: '425156547044-a8gnro92fhtf6shstfrune7oc8i6i0hf.apps.googleusercontent.com',
-            clientSecretValue: SecretValue.ssmSecure('/google_oauth_client_secret'),
+            clientSecretValue: SecretValue.ssmSecure('google_oauth_client_secret'),
             scopes: ['email', 'profile', 'openid'],
 
             attributeMapping: {
