@@ -70,7 +70,7 @@ export class UserPoolStack extends cdk.Stack {
                 familyName: ProviderAttribute.GOOGLE_FAMILY_NAME,
             }
         }));
-
+/*
         const hostedZoneId = 'Z07732022HSGPH3GRGCVY'
         const zoneName = 'auth.ondemandenv.link'
 
@@ -80,14 +80,19 @@ export class UserPoolStack extends cdk.Stack {
         });
 
         const domainName: string = 'use1.' + zoneName
+        */
 
         const domain = userPool.addDomain('AuthDomain', {
-            customDomain: {
+            /*customDomain: {
                 domainName,
                 certificate: new Certificate(this, 'Certificate', {
                     domainName,
                     validation: CertificateValidation.fromDns(hostedZone)
                 }),
+                Custom domain is not a valid subdomain: Was not able to resolve a DNS A record for the parent domain or domain parent is a top-level domain. (Service: AWSCognitoIdentityProviderService; Status Code: 400; Error Code: InvalidParameterException; Request ID: 29547892-206c-43a9-bbcb-c3fcae498963; Proxy: null)
+            }*/
+            cognitoDomain:{
+                domainPrefix: 'odmd-auth',
             }
         });
 
