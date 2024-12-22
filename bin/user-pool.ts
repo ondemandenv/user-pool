@@ -14,7 +14,7 @@ async function main() {
     const buildRegion = process.env.CDK_DEFAULT_REGION;
     const buildAccount = process.env.CDK_DEFAULT_ACCOUNT;
     if (!buildRegion || !buildAccount) {
-        throw new Error("buildRegion>>" + buildRegion + "; buildAccount>" + buildAccount)
+        throw new Error("buildRegion>>>" + buildRegion + "; buildAccount>" + buildAccount)
     }
 
     const props = {
