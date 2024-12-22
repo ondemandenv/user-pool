@@ -79,13 +79,9 @@ export class UserPoolStack extends cdk.Stack {
             zoneName,
         });
 
-        const domainPrefix = 'odmd-sandbox';
-        const domainName: string = domainPrefix + '.' + zoneName
+        const domainName: string = zoneName
 
         const domain = userPool.addDomain('AuthDomain', {
-            cognitoDomain: {
-                domainPrefix,
-            },
             customDomain: {
                 domainName,
                 certificate: new Certificate(this, 'Certificate', {

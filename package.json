@@ -9,8 +9,8 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "cdk-ls": "cross-env ODMD_build_id=LlmChatLambdaS3 ODMD_rev_ref=b..main cdk ls --profile sandbox-workspace1",
-    "cdk-sa": "cross-env ODMD_build_id=LlmChatLambdaS3 ODMD_rev_ref=b..main cdk synth * --profile sandbox-workspace1"
+    "cdk-ls": "cross-env ODMD_build_id=CognitoUserPool ODMD_rev_ref=b..main cdk ls --profile sandbox-workspace1",
+    "cdk-sa": "cross-env ODMD_build_id=CognitoUserPool ODMD_rev_ref=b..main cdk synth * --profile sandbox-workspace1"
   },
   "devDependencies": {
     "@ondemandenv/odmd-contracts-sandbox": "0.0.48",
