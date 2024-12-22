@@ -79,7 +79,7 @@ export class UserPoolStack extends cdk.Stack {
             zoneName,
         });
 
-        const domainName: string = zoneName
+        const domainName: string = 'use1.' + zoneName
 
         const domain = userPool.addDomain('AuthDomain', {
             customDomain: {
