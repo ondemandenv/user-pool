@@ -8,13 +8,14 @@ import {
     UserPoolIdentityProviderGoogle
 } from "aws-cdk-lib/aws-cognito";
 import {SecretValue} from "aws-cdk-lib";
-import {HostedZone} from "aws-cdk-lib/aws-route53";
+import {ARecord, HostedZone, RecordTarget} from "aws-cdk-lib/aws-route53";
 import {Certificate, CertificateValidation} from "aws-cdk-lib/aws-certificatemanager";
 import {OndemandContractsSandbox} from "@ondemandenv/odmd-contracts-sandbox";
 import {
     CognitoUserPoolEnver
 } from "@ondemandenv/odmd-contracts-sandbox/lib/repos/user-pool/CognitoUserPoolCdkOdmdBuild";
-import {OdmdCrossRefProducer, OdmdEnverCdk, OdmdShareOut} from "@ondemandenv/contracts-lib-base";
+import {OdmdCrossRefProducer, OdmdShareOut} from "@ondemandenv/contracts-lib-base";
+import {UserPoolDomainTarget} from "aws-cdk-lib/aws-route53-targets";
 
 export class UserPoolStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -95,6 +96,14 @@ export class UserPoolStack extends cdk.Stack {
             cognitoDomain: {
                 domainPrefix: 'odmd-auth',
             }*/
+        });
+
+        new ARecord(this, 'CognitoDomainARecord', {
+            zone: hostedZone,
+            recordName: 'auth',
+            target: RecordTarget.fromAlias(
+                new UserPoolDomainTarget(domain)
+            )
         });
 
         const resourceClient = new UserPoolClient(this, 'ResourceClient', {
