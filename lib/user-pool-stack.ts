@@ -7,13 +7,10 @@ import {
     UserPoolClientIdentityProvider,
     UserPoolIdentityProviderGoogle
 } from "aws-cdk-lib/aws-cognito";
-import {SecretValue} from "aws-cdk-lib";
+import {SecretValue, Stack} from "aws-cdk-lib";
 import {ARecord, HostedZone, RecordTarget} from "aws-cdk-lib/aws-route53";
 import {Certificate, CertificateValidation} from "aws-cdk-lib/aws-certificatemanager";
-import {OndemandContractsSandbox} from "@ondemandenv/odmd-contracts-sandbox";
-import {
-    CognitoUserPoolEnver
-} from "@ondemandenv/odmd-contracts-sandbox/lib/repos/user-pool/CognitoUserPoolCdkOdmdBuild";
+import {OdmdEnverUserAuthSbx, OndemandContractsSandbox} from "@ondemandenv/odmd-contracts-sandbox";
 import {OdmdCrossRefProducer, OdmdShareOut} from "@ondemandenv/contracts-lib-base";
 import {UserPoolDomainTarget} from "aws-cdk-lib/aws-route53-targets";
 
@@ -21,7 +18,7 @@ export class UserPoolStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        const myEnver = OndemandContractsSandbox.inst.getTargetEnver() as CognitoUserPoolEnver
+        const myEnver = OndemandContractsSandbox.inst.getTargetEnver() as OdmdEnverUserAuthSbx
 
         const userPool = new UserPool(this, 'Pool', {
             userPoolName: 'auth.ondemandenv.link',
@@ -45,11 +42,12 @@ export class UserPoolStack extends cdk.Stack {
                 },
                 scopes: [OAuthScope.EMAIL, OAuthScope.OPENID, OAuthScope.PROFILE],
                 callbackUrls: [
-                    // 'http://localhost:5173/callback',
-                    ...myEnver.llmChatCallbackUrl.map(c => c.getSharedValue(this))
+                    'http://localhost:5173/callback',
+                    // ...myEnver.llmChatCallbackUrl.map(c => c.getSharedValue(this))
                 ],
                 logoutUrls: [
-                    ...myEnver.llmChatLogoutUrl.map(c => c.getSharedValue(this))
+                    'http://localhost:5173/callback',
+                    // ...myEnver.llmChatLogoutUrl.map(c => c.getSharedValue(this))
                 ],
 
             },
@@ -106,22 +104,9 @@ export class UserPoolStack extends cdk.Stack {
             )
         });
 
-        const resourceClient = new UserPoolClient(this, 'ResourceClient', {
-            userPool: userPool,
-            generateSecret: false,
-            authFlows: {
-                userSrp: true,
-                userPassword: true,
-            },
-            preventUserExistenceErrors: true,
-        });
-
-        new OdmdShareOut(this, new Map<OdmdCrossRefProducer<CognitoUserPoolEnver>, any>([
-            [myEnver.userPoolId, userPool.userPoolId],
-            [myEnver.userPoolArn, userPool.userPoolArn],
-            [myEnver.oauthUserPoolClientId, oauthUserpoolClient.userPoolClientId],
-            [myEnver.oauth2RedirectUri, domain.baseUrl() + '/oauth2/idpresponse'],
-            [myEnver.resourceUserPoolClientId, resourceClient.userPoolClientId],
+        new OdmdShareOut(this, new Map<OdmdCrossRefProducer<OdmdEnverUserAuthSbx>, any>([
+            [myEnver.idProviderName, `cognito-idp.${Stack.of(this).region}.amazonaws.com/${userPool.userPoolId}`],
+            [myEnver.idProviderClientId, oauthUserpoolClient.userPoolClientId],
         ]))
 
         new cdk.CfnOutput(this, 'UserPoolId', {value: userPool.userPoolId});
