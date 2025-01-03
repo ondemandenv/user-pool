@@ -1,11 +1,13 @@
 #ODMD GENERATED WORKFLOW, don't change unless you are sure
 
-name: ODMD_CognitoUserPool-CdkGithubWFus-east-1-workspace0
+name: ODMD_OdmdBuildUserAuth-CdkGithubWFus-east-1-workspace0
 on:
   workflow_dispatch:
     inputs:
       aws_credentials:
         type: string
+        required: false
+        default: ''
         description: | 
           Your AWS credentials in the format:
           [workspace0_Role/Profile]
@@ -14,7 +16,14 @@ on:
           aws_session_token=token0123456789
       message:
         type: string
-        description: additional message
+        required: false
+        default: ''
+        description: 'additional message'
+      ghWflPpStackName:
+        type: string
+        required: false
+        default: ''
+        description: 'the stack to reload, ignored by default'
 jobs:
   odmd_job:
     runs-on: ubuntu-latest
@@ -29,9 +38,10 @@ jobs:
           aws_credentials: ${{github.event.inputs.aws_credentials}}
           trigger_message: ${{github.event.inputs.message}}
         env:
-          ODMD_buildId: CognitoUserPool
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          ODMD_buildId: OdmdBuildUserAuth
           ODMD_awsRegion: us-east-1
-          ODMD_SECRETS: ${{ secrets['ODMD_SECRETS_ODMD_CognitoUserPool_CdkGithubWFus_east_1_workspace0'] }}
+          ODMD_SECRETS: ${{ secrets['ODMD_SECRETS_ODMD_OdmdBuildUserAuth_CdkGithubWFus_east_1_workspace0'] }}
       
       - name: run enver local script
         run: |
@@ -49,13 +59,13 @@ jobs:
           
         env:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          ODMD_buildId: CognitoUserPool
-          ODMD_SECRETS: ${{ secrets['ODMD_SECRETS_ODMD_CognitoUserPool_CdkGithubWFus_east_1_workspace0'] }}      
+          ODMD_buildId: OdmdBuildUserAuth
+          ODMD_SECRETS: ${{ secrets['ODMD_SECRETS_ODMD_OdmdBuildUserAuth_CdkGithubWFus_east_1_workspace0'] }}      
           
       - uses: ondemandenv/wflact-buildProduces@main
         env:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          ODMD_buildId: CognitoUserPool
-          ODMD_SECRETS: ${{ secrets['ODMD_SECRETS_ODMD_CognitoUserPool_CdkGithubWFus_east_1_workspace0'] }}
+          ODMD_buildId: OdmdBuildUserAuth
+          ODMD_SECRETS: ${{ secrets['ODMD_SECRETS_ODMD_OdmdBuildUserAuth_CdkGithubWFus_east_1_workspace0'] }}
 
 #
