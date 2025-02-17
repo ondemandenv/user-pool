@@ -11,7 +11,7 @@ import {SecretValue, Stack} from "aws-cdk-lib";
 import {ARecord, HostedZone, RecordTarget} from "aws-cdk-lib/aws-route53";
 import {Certificate, CertificateValidation} from "aws-cdk-lib/aws-certificatemanager";
 import {OdmdEnverUserAuthSbx, OndemandContractsSandbox} from "@ondemandenv/odmd-contracts-sandbox";
-import {OdmdCrossRefProducer, OdmdShareOut} from "@ondemandenv/contracts-lib-base";
+import {OdmdCrossRefProducer, OdmdEnverUserAuth, OdmdShareOut} from "@ondemandenv/contracts-lib-base";
 import {UserPoolDomainTarget} from "aws-cdk-lib/aws-route53-targets";
 
 export class UserPoolStack extends cdk.Stack {
@@ -34,6 +34,11 @@ export class UserPoolStack extends cdk.Stack {
             }
         });
 
+        const callbackUrls = myEnver.callbackUrls.map(c => c.getSharedValue(this))
+        callbackUrls.push('http://localhost:5173/callback')
+        const logoutUrls = myEnver.logoutUrls.map(c => c.getSharedValue(this))
+        logoutUrls.push('http://localhost:5173/logout')
+
         const oauthUserpoolClient = new UserPoolClient(this, 'UserPoolClient', {
             userPool,
             oAuth: {
@@ -41,15 +46,8 @@ export class UserPoolStack extends cdk.Stack {
                     authorizationCodeGrant: true,
                 },
                 scopes: [OAuthScope.EMAIL, OAuthScope.OPENID, OAuthScope.PROFILE],
-                callbackUrls: [
-                    'http://localhost:5173/callback',
-                    // ...myEnver.llmChatCallbackUrl.map(c => c.getSharedValue(this))
-                ],
-                logoutUrls: [
-                    'http://localhost:5173/callback',
-                    // ...myEnver.llmChatLogoutUrl.map(c => c.getSharedValue(this))
-                ],
-
+                callbackUrls,
+                logoutUrls,
             },
             supportedIdentityProviders: [
                 UserPoolClientIdentityProvider.GOOGLE,
@@ -104,7 +102,8 @@ export class UserPoolStack extends cdk.Stack {
             )
         });
 
-        new OdmdShareOut(this, new Map<OdmdCrossRefProducer<OdmdEnverUserAuthSbx>, any>([
+
+        new OdmdShareOut(this, new Map<OdmdCrossRefProducer<OdmdEnverUserAuth>, any>([
             [myEnver.idProviderName, `cognito-idp.${Stack.of(this).region}.amazonaws.com/${userPool.userPoolId}`],
             [myEnver.idProviderClientId, oauthUserpoolClient.userPoolClientId],
         ]))
