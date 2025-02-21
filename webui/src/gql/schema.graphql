@@ -1,0 +1,86 @@
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
+}
+
+directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
+
+
+## Core Entity Type
+type Entity {
+    id: ID!           ## Unique hierarchical identifier
+    content: String  ## Structured data (e.g., repo metadata, build logs)
+}
+
+## Relationship: Enver -> Product (ID implies Enver)
+type Consuming {
+    id: ID!           ## Format: <buildId>/<enverRef>/<name> (e.g., "build123/env-prod/img-repo")
+    productId: ID!    ## Reference to PRODUCT entity (e.g., "build123/env-prod/img-repo/v1.0")
+    content: String  ## Relationship metadata (e.g., deployment status)
+}
+
+## Paginated Responses
+type EntityConnection {
+    items: [Entity!]!
+    nextToken: String
+}
+
+type ConsumingConnection {
+    items: [Consuming!]!
+    nextToken: String
+}
+
+## Input Types
+input PaginationInput {
+    limit: Int!
+    nextToken: String
+}
+
+input CreateEntityInput {
+    id: ID           ## Optional (server generates if omitted)
+    content: String
+}
+
+input UpdateEntityInput {
+    id: ID!
+    content: String
+}
+
+input CreateConsumingInput {
+    id: ID!          ## Must start with an existing Enver ID (validated)
+    productId: ID!   ## Must match a PRODUCT entity (validated)
+    content: String
+}
+
+## Query and Mutation
+type Query {
+    ## Entity Operations
+    getEntity(id: ID!): Entity
+
+    listEntitiesWithFilter(
+        filter: String
+        pagination: PaginationInput
+    ): EntityConnection!
+}
+
+type Mutation {
+    ## Entity CRUD
+    createEntity(input: CreateEntityInput!): Entity!
+    updateEntity(input: UpdateEntityInput!): Entity!
+    deleteEntity(id: ID!): Entity!
+
+    ## Consuming Relationships
+    createConsuming(input: CreateConsumingInput!): Consuming!
+    deleteConsuming(id: ID!): Consuming!
+}
+
+type Subscription {
+    ## Entity Lifecycle
+    onEntityChanged(id: ID): Entity
+    @aws_subscribe(mutations: ["createEntity", "updateEntity", "deleteEntity"])
+
+    ## Consuming Lifecycle (subscribe to all Consumings under an Enver)
+    onConsumingChanged(enverId: ID!): Consuming
+    @aws_subscribe(mutations: ["createConsuming", "deleteConsuming"])
+}

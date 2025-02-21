@@ -1,0 +1,28 @@
+{
+  "name": "network-vis",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.3",
+    "vite": "^6.1.1"
+  },
+  "dependencies": {
+    "@aws-crypto/sha256-js": "^5.2.0",
+    "@aws-sdk/protocol-http": "^3.374.0",
+    "@aws-sdk/signature-v4": "^3.374.0",
+    "@aws-sdk/url-parser": "^3.374.0",
+    "@aws-sdk/client-ssm": "^3.750.0",
+    "@aws-sdk/client-cognito-identity": "^3.750.0",
+    "@aws-sdk/credential-provider-cognito-identity": "^3.750.0",
+    "graphql-tag": "^2.12.6",
+    "graphql-ws": "^5.16.2",
+    "vis-data": "^7.1.9",
+    "vis-network": "^9.1.9"
+  }
+}

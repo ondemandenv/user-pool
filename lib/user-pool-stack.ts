@@ -15,6 +15,9 @@ import {OdmdCrossRefProducer, OdmdEnverUserAuth, OdmdShareOut} from "@ondemanden
 import {UserPoolDomainTarget} from "aws-cdk-lib/aws-route53-targets";
 
 export class UserPoolStack extends cdk.Stack {
+
+    static readonly hostedZoneId = 'Z07732022HSGPH3GRGCVY'
+    static readonly zoneName = 'auth.ondemandenv.link'
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
@@ -68,8 +71,8 @@ export class UserPoolStack extends cdk.Stack {
             }
         }));
 
-        const hostedZoneId = 'Z07732022HSGPH3GRGCVY'
-        const zoneName = 'auth.ondemandenv.link'
+        const hostedZoneId = UserPoolStack.hostedZoneId
+        const zoneName = UserPoolStack.hostedZoneId
 
         const hostedZone = HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
             hostedZoneId,

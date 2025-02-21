@@ -5,6 +5,8 @@ import {StackProps} from "aws-cdk-lib";
 import {OndemandContractsSandbox} from "@ondemandenv/odmd-contracts-sandbox";
 import {OdmdEnverCdk} from "@ondemandenv/contracts-lib-base";
 import {UserPoolStack} from "../lib/user-pool-stack";
+import {WebHostingStack} from "../lib/web-hosting-stack";
+import {WebUiStack} from "../lib/web-ui-stack";
 
 const app = new cdk.App();
 
@@ -28,7 +30,9 @@ async function main() {
 
     const targetEnver = OndemandContractsSandbox.inst.getTargetEnver() as OdmdEnverCdk
 
-    new UserPoolStack(app, targetEnver.getRevStackNames()[0], props)
+    const usrPool = new UserPoolStack(app, targetEnver.getRevStackNames()[0], props)
+    const webHosting = new WebHostingStack(app, targetEnver.getRevStackNames()[1], props)
+    const webUi = new WebUiStack(app, targetEnver.getRevStackNames()[2], {...props, bucket: webHosting.bucket})
 
 }
 

@@ -1,0 +1,1 @@
+cd webui && npm run build
