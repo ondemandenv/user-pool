@@ -28,8 +28,7 @@ export class WebUiStack extends cdk.Stack {
         const myEnver = OndemandContractsSandbox.inst.getTargetEnver() as OdmdEnverUserAuthSbx
 
 
-        const stsClient = new STSClient({region: this.region});
-        const assumeRoleResponse = await stsClient.send(new AssumeRoleCommand({
+        const assumeRoleResponse = await new STSClient({region: this.region}).send(new AssumeRoleCommand({
             RoleArn: myEnver.centralRoleArn,
             RoleSessionName: 'getValsFromCentral'
         }));
@@ -44,7 +43,7 @@ export class WebUiStack extends cdk.Stack {
             },
         });
         const s3Client = new S3Client({
-            region: OndemandContractsSandbox.inst.contractsLibBuild.envers[0].targetAWSRegion,
+            region: this.region,
             credentials: {
                 accessKeyId: credentials.AccessKeyId!,
                 secretAccessKey: credentials.SecretAccessKey!,
