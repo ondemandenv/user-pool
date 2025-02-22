@@ -13,7 +13,9 @@
     "cdk-sa": "cross-env ODMD_build_id=OdmdBuildUserAuth ODMD_rev_ref=b..main cdk synth * --profile sandbox-workspace1"
   },
   "devDependencies": {
-    "@ondemandenv/odmd-contracts-sandbox": "0.0.69",
+    "@ondemandenv/odmd-contracts-sandbox": "0.0.71",
+    "@aws-sdk/client-sts": "^3.750.0",
+    "@aws-sdk/client-ssm": "^3.750.0",
     "@types/jest": "^29.5.14",
     "@types/node": "22.7.9",
     "cross-env": "^7.0.3",

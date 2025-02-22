@@ -18,12 +18,16 @@ export class UserPoolStack extends cdk.Stack {
 
     static readonly hostedZoneId = 'Z07732022HSGPH3GRGCVY'
     static readonly zoneName = 'auth.ondemandenv.link'
+
+
+    readonly userPool: UserPool
+
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
         const myEnver = OndemandContractsSandbox.inst.getTargetEnver() as OdmdEnverUserAuthSbx
 
-        const userPool = new UserPool(this, 'Pool', {
+        this.userPool = new UserPool(this, 'Pool', {
             userPoolName: 'auth.ondemandenv.link',
             selfSignUpEnabled: true,
             signInAliases: {
@@ -36,6 +40,7 @@ export class UserPoolStack extends cdk.Stack {
                 },
             }
         });
+        const userPool = this.userPool
 
         const callbackUrls = myEnver.callbackUrls.map(c => c.getSharedValue(this))
         callbackUrls.push('http://localhost:5173/callback')
@@ -108,7 +113,7 @@ export class UserPoolStack extends cdk.Stack {
 
         new OdmdShareOut(this, new Map<OdmdCrossRefProducer<OdmdEnverUserAuth>, any>([
             [myEnver.idProviderName, `cognito-idp.${Stack.of(this).region}.amazonaws.com/${userPool.userPoolId}`],
-            [myEnver.idProviderClientId, oauthUserpoolClient.userPoolClientId],
+            [myEnver.idProviderClientId, oauthUserpoolClient.userPoolClientId]
         ]))
 
         new cdk.CfnOutput(this, 'UserPoolId', {value: userPool.userPoolId});
