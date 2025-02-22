@@ -4,6 +4,7 @@ import {GraphQlService} from "./gql/GraphQlService.ts";
 import {AuthService} from "./auth/AuthService.ts";
 import {Entity} from "./gql/types.ts";
 import {BuildNode} from "./models/nodes/BuildNode.ts";
+import {ConfigService} from "./OdmdConfig.ts";
 
 const cachedSelected = localStorage.getItem('_selectedBuildIds');//, JSON.stringify(Array.from(_selectedBuildIds)))
 const _selectedBuildIds = new Set<string>(cachedSelected ? JSON.parse(cachedSelected) : [
@@ -92,9 +93,9 @@ function buildSelectionPanel(allBuildIds: string[]) {
 
 async function main() {
 
-    const allBuildEntities = (await import( './initial.data.json' )).default as Entity[]
+    const config = await ConfigService.getInstance()
 
-    const auth = new AuthService();
+    const auth = new AuthService( config );
 
     // Handle OAuth callback
     const url = new URL(window.location.href);
@@ -116,6 +117,7 @@ async function main() {
         <div id="auth-container"></div>
     `;
 
+    const allBuildEntities = config.visData
     buildSelectionPanel(allBuildEntities.map(i => i.id));
 
     // Handle authentication UI
@@ -131,7 +133,7 @@ async function main() {
             await auth.refreshCredentials()
         }
 
-        const graphQLService = new GraphQlService(auth.credentials!);
+        new GraphQlService(auth.credentials!, config);
 
         authContainer!.innerHTML = `
             <div class="user-info">

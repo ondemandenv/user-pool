@@ -1,6 +1,7 @@
 import {CognitoIdentityClient} from "@aws-sdk/client-cognito-identity";
 import {fromCognitoIdentityPool} from "@aws-sdk/credential-provider-cognito-identity";
 import {AwsCredentialIdentity} from "@aws-sdk/types";
+import {OdmdConfig} from "../OdmdConfig.ts";
 
 interface UserInfo {
     name: string;
@@ -16,11 +17,17 @@ export class AuthService {
         return this._inst
     }
 
-    constructor() {
+    constructor( config: OdmdConfig) {
         if (AuthService._inst) {
             throw new Error("AuthService._inst must be singleton");
         }
         AuthService._inst = this;
+        this.authConfig.userPoolId = config.userPoolId;
+        this.authConfig.clientId = config["id-provider-clientId"];
+        this.authConfig.region = config.region;
+        this.authConfig.identityPoolId = config.IdentityPoolId
+        this.authConfig.domain = config.userPoolDomain
+        this.authConfig.redirectUri = `https://${config.webDomain}/callback`
     }
 
     private _credentials: AwsCredentialIdentity | null = null;
@@ -34,14 +41,13 @@ export class AuthService {
         userPoolId: 'us-east-1_GgMY7yMIZ',
         clientId: '1svotsobb7khpm32u5qnh1r1dg',
         region: 'us-east-1',
+        identityPoolId: 'us-east-1:62cdfb1f-ce35-4eac-a707-6b8ae3782962',
         domain: 'auth.ondemandenv.link',
 
         redirectUri: 'http://localhost:5173/callback',
         scope: 'email profile openid',
 
         tokenRefreshInterval: 20 * 60 * 1000,
-
-        identityPoolId: 'us-east-1:62cdfb1f-ce35-4eac-a707-6b8ae3782962',
     };
 
 

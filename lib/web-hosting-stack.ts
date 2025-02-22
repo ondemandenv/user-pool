@@ -13,6 +13,7 @@ import {UserPoolStack} from "./user-pool-stack";
 export class WebHostingStack extends cdk.Stack {
 
     readonly bucket: Bucket
+    readonly webDomain: string
 
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
@@ -29,41 +30,39 @@ export class WebHostingStack extends cdk.Stack {
         });
 
         if (this.region == 'us-east-1') {
-            this.cloudfront(zoneName, this.bucket, hostedZone);
+
+            this.bucket.grantRead(new ServicePrincipal('cloudfront.amazonaws.com'));
+
+            const webSubdomain = 'web'
+            const webSubFqdn = webSubdomain + '.' + zoneName
+            this.webDomain = webSubFqdn
+
+            const distribution = new Distribution(this, 'Distribution', {
+                defaultBehavior: {
+                    origin: S3BucketOrigin.withOriginAccessControl(this.bucket),
+                    viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                    compress: true
+                },
+                domainNames: [webSubFqdn],
+                certificate: new Certificate(this, 'web-Certificate', {
+                    domainName: webSubFqdn,
+                    validation: CertificateValidation.fromDns(hostedZone)
+                }),
+                defaultRootObject: 'index.html'
+            });
+
+
+            new ARecord(this, 'WebsiteAliasRecord', {
+                zone: hostedZone,
+                target: RecordTarget.fromAlias(
+                    new CloudFrontTarget(distribution)
+                ),
+                recordName: webSubdomain
+            });
         } else {
             console.warn(`IGNOREING cloudfront because this region ${this.region} does not support`);
         }
     }
 
-    private cloudfront(hostZoneName: string, bucket: Bucket, hostedZone: IHostedZone) {
-
-        this.bucket.grantRead(new ServicePrincipal('cloudfront.amazonaws.com'));
-
-        const webSubdomain = 'web'
-        const webSubFqdn = webSubdomain + '.' + hostZoneName
-
-        const distribution = new Distribution(this, 'Distribution', {
-            defaultBehavior: {
-                origin: S3BucketOrigin.withOriginAccessControl(bucket),
-                viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                compress: true
-            },
-            domainNames: [webSubFqdn],
-            certificate: new Certificate(this, 'web-Certificate', {
-                domainName: webSubFqdn,
-                validation: CertificateValidation.fromDns(hostedZone)
-            }),
-            defaultRootObject: 'index.html'
-        });
-
-
-        new ARecord(this, 'WebsiteAliasRecord', {
-            zone: hostedZone,
-            target: RecordTarget.fromAlias(
-                new CloudFrontTarget(distribution)
-            ),
-            recordName: webSubdomain
-        });
-    }
 
 }

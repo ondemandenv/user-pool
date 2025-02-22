@@ -33,7 +33,8 @@ async function main() {
     const usrPool = new UserPoolStack(app, targetEnver.getRevStackNames()[0], props)
     const webHosting = new WebHostingStack(app, targetEnver.getRevStackNames()[1], props)
     const webUi = new WebUiStack(app, targetEnver.getRevStackNames()[2], {
-        ...props, bucket: webHosting.bucket, userPool: usrPool.userPool})
+        ...props, bucket: webHosting.bucket, userPool: usrPool.userPool, webDomain: webHosting.webDomain
+    })
 
     await webUi.buildWebUiAndDeploy()
 

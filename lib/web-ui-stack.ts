@@ -9,24 +9,26 @@ import {UserPool} from "aws-cdk-lib/aws-cognito";
 import {AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId} from "aws-cdk-lib/custom-resources";
 import {GetObjectCommand, S3Client} from "@aws-sdk/client-s3";
 import {Readable} from "node:stream";
+import {UserPoolStack} from "./user-pool-stack";
 
 export class WebUiStack extends cdk.Stack {
 
     readonly targetBucket: Bucket;
     readonly userPool: UserPool;
+    readonly webDomain: string;
 
     constructor(scope: Construct, id: string, props: cdk.StackProps & {
-        bucket: Bucket, userPool: UserPool
+        bucket: Bucket, userPool: UserPool, webDomain: string
     }) {
         super(scope, id, props);
         this.targetBucket = props.bucket;
         this.userPool = props.userPool;
+        this.webDomain = props.webDomain;
     }
 
     async buildWebUiAndDeploy() {
 
         const myEnver = OndemandContractsSandbox.inst.getTargetEnver() as OdmdEnverUserAuthSbx
-
 
         const assumeRoleResponse = await new STSClient({region: this.region}).send(new AssumeRoleCommand({
             RoleArn: myEnver.centralRoleArn,
@@ -86,7 +88,10 @@ export class WebUiStack extends cdk.Stack {
             obj[p.Name?.split('/').at(-1) as string] = p.Value!
         })
 
+        obj.region = this.region
         obj.userPoolId = this.userPool.userPoolId
+        obj.userPoolDomain = UserPoolStack.zoneName
+        obj.webDomain = this.webDomain
         obj.visData = JSON.parse(bufferLikeBuffer.toString())
 
         const configParams = {
