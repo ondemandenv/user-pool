@@ -1,1 +1,1 @@
-cd webui && npm run install && npm run build
+cd webui && npm install && npm run build
