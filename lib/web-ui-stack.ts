@@ -74,11 +74,11 @@ export class WebUiStack extends cdk.Stack {
         }))
 
         const bodyStream = visDataOut.Body as Readable;
-        const ooo = await new Promise<Buffer>((resolve, reject) => {
+        const bufferLikeBuffer = await new Promise<Buffer>((resolve, reject) => {
             const chunks: Buffer[] = [];
             bodyStream.on('data', (chunk) => chunks.push(chunk));
             bodyStream.on('end', () => resolve(Buffer.concat(chunks)));
-            bodyStream.on('error', reject); // Handle stream errors as well
+            bodyStream.on('error', reject);
         });
 
         const obj = {} as { [k: string]: any };
@@ -87,7 +87,7 @@ export class WebUiStack extends cdk.Stack {
         })
 
         obj.userPoolId = this.userPool.userPoolId
-        obj.visData = ooo.toJSON()
+        obj.visData = JSON.parse(bufferLikeBuffer.toString())
 
         const configParams = {
             Bucket: this.targetBucket.bucketName,
