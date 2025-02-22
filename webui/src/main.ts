@@ -1,4 +1,3 @@
-import './style.css';
 import {NetworkGraph} from './NetworkGraph';
 import {GraphQlService} from "./gql/GraphQlService.ts";
 import {AuthService} from "./auth/AuthService.ts";
