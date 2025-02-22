@@ -16,14 +16,17 @@ import {UserPoolDomainTarget} from "aws-cdk-lib/aws-route53-targets";
 
 export class UserPoolStack extends cdk.Stack {
 
-    static readonly hostedZoneId = 'Z07732022HSGPH3GRGCVY'
-    static readonly zoneName = 'auth.ondemandenv.link'
-
+    readonly hostedZoneId: string
+    readonly zoneName: string
 
     readonly userPool: UserPool
 
-    constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    constructor(scope: Construct, id: string, props: cdk.StackProps & {
+        hostedZoneId: string, zoneName: string, webSubFQDN: string
+    }) {
         super(scope, id, props);
+        this.hostedZoneId = props.hostedZoneId;
+        this.zoneName = props.zoneName;
 
         const myEnver = OndemandContractsSandbox.inst.getTargetEnver() as OdmdEnverUserAuthSbx
 
@@ -44,8 +47,10 @@ export class UserPoolStack extends cdk.Stack {
 
         const callbackUrls = myEnver.callbackUrls.map(c => c.getSharedValue(this))
         callbackUrls.push('http://localhost:5173/callback')
+        callbackUrls.push(`https://web.${props.webSubFQDN}/callback`)
         const logoutUrls = myEnver.logoutUrls.map(c => c.getSharedValue(this))
         logoutUrls.push('http://localhost:5173/logout')
+        logoutUrls.push(`https://web.${props.webSubFQDN}/logout`)
 
         const oauthUserpoolClient = new UserPoolClient(this, 'UserPoolClient', {
             userPool,
@@ -76,15 +81,12 @@ export class UserPoolStack extends cdk.Stack {
             }
         }));
 
-        const hostedZoneId = UserPoolStack.hostedZoneId
-        const zoneName = UserPoolStack.zoneName
-
         const hostedZone = HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
-            hostedZoneId,
-            zoneName,
+            hostedZoneId: this.hostedZoneId,
+            zoneName: this.zoneName,
         });
 
-        const domainName: string = /*'use1.' +*/ zoneName
+        const domainName: string = /*'use1.' +*/ this.zoneName
 
 
         const domain = userPool.addDomain('AuthDomain', {

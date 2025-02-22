@@ -7,15 +7,14 @@ import {BlockPublicAccess, Bucket} from "aws-cdk-lib/aws-s3";
 import {ServicePrincipal} from "aws-cdk-lib/aws-iam";
 import {Distribution, ViewerProtocolPolicy} from "aws-cdk-lib/aws-cloudfront";
 import {S3BucketOrigin} from "aws-cdk-lib/aws-cloudfront-origins";
-import {UserPoolStack} from "./user-pool-stack";
 
 
 export class WebHostingStack extends cdk.Stack {
 
     readonly bucket: Bucket
-    readonly webDomain: string
+    readonly webSubFQDN: string
 
-    constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    constructor(scope: Construct, id: string, props: cdk.StackProps&{zoneName:string, hostedZoneId:string}) {
         super(scope, id, props);
 
         this.bucket = new Bucket(this, 'bucket', {
@@ -23,9 +22,9 @@ export class WebHostingStack extends cdk.Stack {
             enforceSSL: true,
             removalPolicy: cdk.RemovalPolicy.DESTROY
         });
-        const zoneName = UserPoolStack.zoneName
+        const zoneName = props.zoneName
         const hostedZone = HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
-            hostedZoneId: UserPoolStack.hostedZoneId,
+            hostedZoneId: props.hostedZoneId,
             zoneName,
         });
 
@@ -34,8 +33,7 @@ export class WebHostingStack extends cdk.Stack {
             this.bucket.grantRead(new ServicePrincipal('cloudfront.amazonaws.com'));
 
             const webSubdomain = 'web'
-            const webSubFqdn = webSubdomain + '.' + zoneName
-            this.webDomain = webSubFqdn
+            this.webSubFQDN = webSubdomain + '.' + zoneName
 
             const distribution = new Distribution(this, 'Distribution', {
                 defaultBehavior: {
@@ -43,9 +41,9 @@ export class WebHostingStack extends cdk.Stack {
                     viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                     compress: true
                 },
-                domainNames: [webSubFqdn],
+                domainNames: [this.webSubFQDN],
                 certificate: new Certificate(this, 'web-Certificate', {
-                    domainName: webSubFqdn,
+                    domainName: this.webSubFQDN,
                     validation: CertificateValidation.fromDns(hostedZone)
                 }),
                 defaultRootObject: 'index.html'

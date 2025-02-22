@@ -30,14 +30,24 @@ async function main() {
 
     const targetEnver = OndemandContractsSandbox.inst.getTargetEnver() as OdmdEnverCdk
 
-    const usrPool = new UserPoolStack(app, targetEnver.getRevStackNames()[0], props)
-    const webHosting = new WebHostingStack(app, targetEnver.getRevStackNames()[1], props)
+    const hostedZoneId = 'Z07732022HSGPH3GRGCVY';
+    const zoneName = 'auth.ondemandenv.link'
+
+    const webHosting = new WebHostingStack(app, targetEnver.getRevStackNames()[1], {
+        ...props, hostedZoneId, zoneName
+    })
+
+    const usrPool = new UserPoolStack(app, targetEnver.getRevStackNames()[0], {
+        ...props, hostedZoneId, zoneName, webSubFQDN: webHosting.webSubFQDN
+    })
+
     const webUi = new WebUiStack(app, targetEnver.getRevStackNames()[2], {
-        ...props, bucket: webHosting.bucket, userPool: usrPool.userPool, webDomain: webHosting.webDomain
+        ...props, bucket: webHosting.bucket, userPool: usrPool.userPool,
+        userPoolDomain: usrPool.zoneName,
+        webDomain: webHosting.webSubFQDN
     })
 
     await webUi.buildWebUiAndDeploy()
-
 }
 
 
