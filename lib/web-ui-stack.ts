@@ -51,6 +51,7 @@ export class WebUiStack extends cdk.Stack {
                 myEnver.appsyncWssEndpoint.toSharePath(),
                 myEnver.appsyncHttpEndpoint.toSharePath(),
                 myEnver.identityPoolId.toSharePath(),
+                //D:\odmd\seed\ONDEMAND_CENTRAL_REPO\src\lib\appsync\AppsyncBackendStack.ts
                 `/odmd-share/${myEnver.owner.buildId}/${myEnver.targetRevision.toPathPartStr()}/centralBucketName`
             ],
             WithDecryption: true
