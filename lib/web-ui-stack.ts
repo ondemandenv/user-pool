@@ -19,6 +19,7 @@ export class WebUiStack extends cdk.Stack {
     }) {
         super(scope, id, props);
         this.targetBucket = props.bucket;
+        this.userPool = props.userPool;
     }
 
     async buildWebUiAndDeploy() {
