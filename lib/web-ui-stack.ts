@@ -65,10 +65,7 @@ export class WebUiStack extends cdk.Stack {
             WithDecryption: true
         }));
 
-
-        console.log('psOut.Parameters:' + JSON.stringify(psOut.Parameters, null, 2));
         const bucketNameParamIdx = psOut.Parameters!.findIndex(p => p.Name == bucketNameParamPath)
-        console.log('bucketNameParamIdx:' + bucketNameParamIdx);
 
         const ps = psOut.Parameters!
         const visDataOut = await s3Client.send(new GetObjectCommand({
