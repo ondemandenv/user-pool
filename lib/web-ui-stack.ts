@@ -44,6 +44,7 @@ export class WebUiStack extends cdk.Stack {
             },
         });
 
+        const bucketNameParamPath = `/odmd-share/${myEnver.owner.buildId}/${myEnver.targetRevision.toPathPartStr()}/centralBucketName`;
         const psOut = await ssmClient.send(new GetParametersCommand({
             Names: [
                 myEnver.idProviderClientId.toSharePath(),
@@ -52,14 +53,20 @@ export class WebUiStack extends cdk.Stack {
                 myEnver.appsyncHttpEndpoint.toSharePath(),
                 myEnver.identityPoolId.toSharePath(),
                 //D:\odmd\seed\ONDEMAND_CENTRAL_REPO\src\lib\appsync\AppsyncBackendStack.ts
-                `/odmd-share/${myEnver.owner.buildId}/${myEnver.targetRevision.toPathPartStr()}/centralBucketName`
+                bucketNameParamPath
             ],
             WithDecryption: true
         }));
+
+
+        console.log('psOut.Parameters:' + JSON.stringify(psOut.Parameters, null, 2));
+        const bucketNameParamIdx = psOut.Parameters!.findIndex(p => p.Name == bucketNameParamPath)
+        console.log('bucketNameParamIdx:' + bucketNameParamIdx);
+
         const ps = psOut.Parameters!
         const s3Client = new S3Client({region: OndemandContractsSandbox.inst.contractsLibBuild.envers[0].targetAWSRegion})
         const visDataOut = await s3Client.send(new GetObjectCommand({
-            Bucket: ps.pop()!.Value!,
+            Bucket: ps.splice(bucketNameParamIdx, 1)[0]!.Value!,
             Key: 'odmd.vis.data.json'
         }))
 
