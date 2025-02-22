@@ -77,7 +77,7 @@ export class UserPoolStack extends cdk.Stack {
         }));
 
         const hostedZoneId = UserPoolStack.hostedZoneId
-        const zoneName = UserPoolStack.hostedZoneId
+        const zoneName = UserPoolStack.zoneName
 
         const hostedZone = HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
             hostedZoneId,
