@@ -48,7 +48,7 @@ export class WebUiStack extends cdk.Stack {
             Body: JSON.stringify(obj),
             ContentType: 'application/json'
         };
-        new AwsCustomResource(this, 'S3PutObject', {
+        const pubConfig = new AwsCustomResource(this, 'S3PutObject', {
             onCreate: {
                 service: 'S3',
                 action: 'putObject',
@@ -66,11 +66,12 @@ export class WebUiStack extends cdk.Stack {
             })
         });
 
-
-        new s3deploy.BucketDeployment(this, 'DeployWebsite', {
-            sources: [s3deploy.Source.asset('webui/dist')],
-            destinationBucket: this.targetBucket,
-        });
+        pubConfig.node.addDependency(
+            new s3deploy.BucketDeployment(this, 'DeployWebsite', {
+                sources: [s3deploy.Source.asset('webui/dist')],
+                destinationBucket: this.targetBucket,
+            })
+        )
 
     }
 
