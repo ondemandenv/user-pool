@@ -97,7 +97,7 @@ export class WebHostingStack extends cdk.Stack {
                         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                         compress: true,
                         cachePolicy: idxPagePolicy,
-                        originRequestPolicy: new OriginRequestPolicy(this, 'CallbackOriginRequestPolicy', {
+                        originRequestPolicy: new OriginRequestPolicy(this, 'LogoutOriginRequestPolicy', {
                             queryStringBehavior: OriginRequestQueryStringBehavior.all(),
                             cookieBehavior: OriginRequestCookieBehavior.all(),
                             headerBehavior: OriginRequestHeaderBehavior.all()
