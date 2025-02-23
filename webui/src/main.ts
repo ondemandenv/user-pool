@@ -99,7 +99,7 @@ async function main() {
 
     // Handle OAuth callback
     const url = new URL(window.location.href);
-    if (url.pathname === '/callback' || url.pathname === '/index.html/callback') {
+    if (url.pathname.startsWith('/index.html?callback')) {
         try {
             const userInfo = await auth.handleCallback(url.searchParams);
             window.location.href = '/';
