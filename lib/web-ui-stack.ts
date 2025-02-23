@@ -59,8 +59,7 @@ export class WebUiStack extends cdk.Stack {
             Names: [
                 myEnver.idProviderClientId.toSharePath(),
                 myEnver.idProviderName.toSharePath(),
-                myEnver.appsyncWssEndpoint.toSharePath(),
-                myEnver.appsyncHttpEndpoint.toSharePath(),
+                myEnver.appsyncGraphqlUrl.toSharePath(),
                 myEnver.identityPoolId.toSharePath(),
                 //D:\odmd\seed\ONDEMAND_CENTRAL_REPO\src\lib\appsync\AppsyncBackendStack.ts
                 bucketNameParamPath

@@ -2,7 +2,6 @@ import "./style.css"
 import {NetworkGraph} from './NetworkGraph';
 import {GraphQlService} from "./gql/GraphQlService.ts";
 import {AuthService} from "./auth/AuthService.ts";
-import {Entity} from "./gql/types.ts";
 import {BuildNode} from "./models/nodes/BuildNode.ts";
 import {ConfigService} from "./OdmdConfig.ts";
 

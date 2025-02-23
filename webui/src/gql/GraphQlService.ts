@@ -5,16 +5,18 @@ import {OdmdConfig} from "../OdmdConfig.ts";
 
 export class GraphQlService {
 
-    readonly gqlConfig:{
+    readonly gqlConfig: {
         httpEndpoint: string,
         wssEndpoint: string,
         region: string,
     };
 
     constructor(creds: AwsCredentialIdentity, config: OdmdConfig) {
+        const tmp = config.appsyncGraphqlUrl.replace('.appsync-api.', '.appsync-realtime-api.').split(':')
+        tmp[0] = 'wss'
         this.gqlConfig = {
-            httpEndpoint: config.appsyncHttpEndpoint,
-            wssEndpoint: config.appsyncWssEndpoint,
+            httpEndpoint: config.appsyncGraphqlUrl,
+            wssEndpoint: tmp.join(':'),
             region: config.region,
         }
 

@@ -2,8 +2,7 @@ import {Entity} from "./gql/types.ts";
 
 export interface OdmdConfig {
     IdentityPoolId: string;
-    appsyncHttpEndpoint: string;
-    appsyncWssEndpoint: string;
+    appsyncGraphqlUrl: string;
     "id-provider-clientId": string;
     "id-provider-name": string;
     userPoolId: string;
