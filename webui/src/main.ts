@@ -95,11 +95,11 @@ async function main() {
 
     const config = await ConfigService.getInstance()
 
-    const auth = new AuthService( config );
+    const auth = new AuthService(config);
 
     // Handle OAuth callback
     const url = new URL(window.location.href);
-    if (url.pathname === '/callback') {
+    if (url.pathname === '/callback' || url.pathname === '/index.html/callback') {
         try {
             const userInfo = await auth.handleCallback(url.searchParams);
             window.location.href = '/';

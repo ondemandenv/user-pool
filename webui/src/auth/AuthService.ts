@@ -28,7 +28,7 @@ export class AuthService {
         this.authConfig.identityPoolId = config.IdentityPoolId
         this.authConfig.domain = config.userPoolDomain
         this.authConfig.redirectUri = config.webDomain == 'localhost'
-            ? 'http://localhost:5173/callback' : `https://${config.webDomain}/callback`
+            ? 'http://localhost:5173/callback' : `https://${config.webDomain}/index.html/callback`
         this.authConfig.tokenRefreshInterval = 20 * 60 * 1000
         this.authConfig.scope = 'email profile openid'
     }
