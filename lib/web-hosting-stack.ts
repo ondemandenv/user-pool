@@ -68,7 +68,7 @@ export class WebHostingStack extends cdk.Stack {
                 },
                 additionalBehaviors: {
                     ...additionalBehaviors,
-                    '/index.html': {
+                    '/index.html*': {
                         origin: origin,
                         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                         compress: true,
@@ -76,11 +76,6 @@ export class WebHostingStack extends cdk.Stack {
                             minTtl: cdk.Duration.seconds(0),
                             maxTtl: cdk.Duration.minutes(2),
                             defaultTtl: cdk.Duration.minutes(1),
-                        }),
-                        originRequestPolicy: new OriginRequestPolicy(this, 'CallbackOriginRequestPolicy', {
-                            queryStringBehavior: OriginRequestQueryStringBehavior.all(),
-                            cookieBehavior: OriginRequestCookieBehavior.all(),
-                            headerBehavior: OriginRequestHeaderBehavior.all()
                         })
                     }
                 },
