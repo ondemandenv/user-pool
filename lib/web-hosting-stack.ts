@@ -1,11 +1,11 @@
 import * as cdk from 'aws-cdk-lib';
 import {Construct} from 'constructs';
-import {ARecord, HostedZone, IHostedZone, RecordTarget} from "aws-cdk-lib/aws-route53";
+import {ARecord, HostedZone, RecordTarget} from "aws-cdk-lib/aws-route53";
 import {Certificate, CertificateValidation} from "aws-cdk-lib/aws-certificatemanager";
 import {CloudFrontTarget} from "aws-cdk-lib/aws-route53-targets";
 import {BlockPublicAccess, Bucket} from "aws-cdk-lib/aws-s3";
 import {ServicePrincipal} from "aws-cdk-lib/aws-iam";
-import {CachePolicy, Distribution, ViewerProtocolPolicy} from "aws-cdk-lib/aws-cloudfront";
+import {BehaviorOptions, CachePolicy, Distribution, ViewerProtocolPolicy} from "aws-cdk-lib/aws-cloudfront";
 import {S3BucketOrigin} from "aws-cdk-lib/aws-cloudfront-origins";
 
 
@@ -36,6 +36,22 @@ export class WebHostingStack extends cdk.Stack {
             this.webSubFQDN = webSubdomain + '.' + zoneName
 
             const origin = S3BucketOrigin.withOriginAccessControl(this.bucket);
+
+
+            const additionalBehaviors: { [key: string]: BehaviorOptions } = {};
+            ['js', 'css', 'svg', 'png', 'jpg', 'jpeg', 'gif', 'woff', 'woff2', 'ttf', 'eot',].map((ext) => {
+                additionalBehaviors[`/*.${ext}`] = {
+                    origin: origin,
+                    viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                    compress: true,
+                    cachePolicy: new CachePolicy(this, 'AssetsCachePolicy', {
+                        minTtl: cdk.Duration.days(1),
+                        maxTtl: cdk.Duration.days(7),
+                        defaultTtl: cdk.Duration.days(7),
+                    })
+                };
+            });
+
             const distribution = new Distribution(this, 'Distribution', {
                 defaultBehavior: {
                     origin: origin,
@@ -43,16 +59,7 @@ export class WebHostingStack extends cdk.Stack {
                     compress: true
                 },
                 additionalBehaviors: {
-                    '/*.(js|css|svg|png|jpg|jpeg|gif|woff|woff2|ttf|eot|...)': {
-                        origin: origin,
-                        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                        compress: true,
-                        cachePolicy: new CachePolicy(this, 'AssetsCachePolicy', {
-                            minTtl: cdk.Duration.days(1),
-                            maxTtl: cdk.Duration.days(7),
-                            defaultTtl: cdk.Duration.days(7),
-                        })
-                    },
+                    ...additionalBehaviors,
                     '/index.html': {
                         origin: origin,
                         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
