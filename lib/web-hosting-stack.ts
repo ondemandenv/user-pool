@@ -47,7 +47,7 @@ export class WebHostingStack extends cdk.Stack {
                         origin: origin,
                         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                         compress: true,
-                        cachePolicy: new CachePolicy(this, 'HtmlCachePolicy', {
+                        cachePolicy: new CachePolicy(this, 'AssetsCachePolicy', {
                             minTtl: cdk.Duration.days(1),
                             maxTtl: cdk.Duration.days(7),
                             defaultTtl: cdk.Duration.days(7),
