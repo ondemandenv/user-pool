@@ -5,7 +5,7 @@ import {Certificate, CertificateValidation} from "aws-cdk-lib/aws-certificateman
 import {CloudFrontTarget} from "aws-cdk-lib/aws-route53-targets";
 import {BlockPublicAccess, Bucket} from "aws-cdk-lib/aws-s3";
 import {ServicePrincipal} from "aws-cdk-lib/aws-iam";
-import {Distribution, ViewerProtocolPolicy} from "aws-cdk-lib/aws-cloudfront";
+import {CachePolicy, Distribution, ViewerProtocolPolicy} from "aws-cdk-lib/aws-cloudfront";
 import {S3BucketOrigin} from "aws-cdk-lib/aws-cloudfront-origins";
 
 
@@ -14,7 +14,7 @@ export class WebHostingStack extends cdk.Stack {
     readonly bucket: Bucket
     readonly webSubFQDN: string
 
-    constructor(scope: Construct, id: string, props: cdk.StackProps&{zoneName:string, hostedZoneId:string}) {
+    constructor(scope: Construct, id: string, props: cdk.StackProps & { zoneName: string, hostedZoneId: string }) {
         super(scope, id, props);
 
         this.bucket = new Bucket(this, 'bucket', {
@@ -35,11 +35,34 @@ export class WebHostingStack extends cdk.Stack {
             const webSubdomain = 'web'
             this.webSubFQDN = webSubdomain + '.' + zoneName
 
+            const origin = S3BucketOrigin.withOriginAccessControl(this.bucket);
             const distribution = new Distribution(this, 'Distribution', {
                 defaultBehavior: {
-                    origin: S3BucketOrigin.withOriginAccessControl(this.bucket),
+                    origin: origin,
                     viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                     compress: true
+                },
+                additionalBehaviors: {
+                    '/*.(js|css|svg|png|jpg|jpeg|gif|woff|woff2|ttf|eot|...)': {
+                        origin: origin,
+                        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                        compress: true,
+                        cachePolicy: new CachePolicy(this, 'HtmlCachePolicy', {
+                            minTtl: cdk.Duration.days(1),
+                            maxTtl: cdk.Duration.days(7),
+                            defaultTtl: cdk.Duration.days(7),
+                        })
+                    },
+                    '/index.html': {
+                        origin: origin,
+                        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                        compress: true,
+                        cachePolicy: new CachePolicy(this, 'HtmlCachePolicy', {
+                            minTtl: cdk.Duration.seconds(0),
+                            maxTtl: cdk.Duration.minutes(2),
+                            defaultTtl: cdk.Duration.minutes(1),
+                        })
+                    }
                 },
                 domainNames: [this.webSubFQDN],
                 certificate: new Certificate(this, 'web-Certificate', {
