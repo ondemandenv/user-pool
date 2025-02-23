@@ -47,10 +47,10 @@ export class UserPoolStack extends cdk.Stack {
 
         const callbackUrls = myEnver.callbackUrls.map(c => c.getSharedValue(this))
         callbackUrls.push('http://localhost:5173/callback')
-        callbackUrls.push(`https://web.${props.webSubFQDN}/callback`)
+        callbackUrls.push(`https://${props.webSubFQDN}/callback`)
         const logoutUrls = myEnver.logoutUrls.map(c => c.getSharedValue(this))
         logoutUrls.push('http://localhost:5173/logout')
-        logoutUrls.push(`https://web.${props.webSubFQDN}/logout`)
+        logoutUrls.push(`https://${props.webSubFQDN}/logout`)
 
         const oauthUserpoolClient = new UserPoolClient(this, 'UserPoolClient', {
             userPool,
