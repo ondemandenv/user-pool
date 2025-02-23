@@ -8,8 +8,7 @@ import {ServicePrincipal} from "aws-cdk-lib/aws-iam";
 import {
     BehaviorOptions,
     CachePolicy,
-    Distribution, OriginRequestCookieBehavior, OriginRequestHeaderBehavior,
-    OriginRequestPolicy, OriginRequestQueryStringBehavior,
+    Distribution, IOrigin,
     ViewerProtocolPolicy
 } from "aws-cdk-lib/aws-cloudfront";
 import {S3BucketOrigin} from "aws-cdk-lib/aws-cloudfront-origins";
@@ -44,22 +43,18 @@ export class WebHostingStack extends cdk.Stack {
             this.webSubFQDN = webSubdomain + '.' + zoneName
 
             const origin = S3BucketOrigin.withOriginAccessControl(this.bucket);
+            const additionalBehaviors = this.createAssetBehaviors(origin);
 
-
-            const additionalBehaviors: { [key: string]: BehaviorOptions } = {};
-            ['js', 'css', 'svg', 'png', 'jpg', 'jpeg', 'gif', 'woff', 'woff2', 'ttf', 'eot',].map((ext) => {
-                additionalBehaviors[`/*.${ext}`] = {
-                    origin: origin,
-                    viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                    compress: true,
-                    cachePolicy: new CachePolicy(this, 'AssetsCachePolicy-' + ext, {
-                        minTtl: cdk.Duration.days(1),
-                        maxTtl: cdk.Duration.days(7),
-                        defaultTtl: cdk.Duration.days(7),
-                    })
-                };
-            });
-
+            const noCaching = {
+                origin: origin,
+                viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                compress: true,
+                cachePolicy: new CachePolicy(this, 'HtmlCachePolicy', {
+                    minTtl: cdk.Duration.seconds(0),
+                    maxTtl: cdk.Duration.minutes(1),
+                    defaultTtl: cdk.Duration.seconds(10),
+                })
+            };
             const distribution = new Distribution(this, 'Distribution', {
                 defaultBehavior: {
                     origin: origin,
@@ -68,16 +63,8 @@ export class WebHostingStack extends cdk.Stack {
                 },
                 additionalBehaviors: {
                     ...additionalBehaviors,
-                    '/index.html*': {
-                        origin: origin,
-                        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-                        compress: true,
-                        cachePolicy: new CachePolicy(this, 'HtmlCachePolicy', {
-                            minTtl: cdk.Duration.seconds(0),
-                            maxTtl: cdk.Duration.minutes(2),
-                            defaultTtl: cdk.Duration.minutes(1),
-                        })
-                    }
+                    '/index.html*': noCaching,
+                    '/config.json': noCaching
                 },
                 domainNames: [this.webSubFQDN],
                 certificate: new Certificate(this, 'web-Certificate', {
@@ -100,5 +87,22 @@ export class WebHostingStack extends cdk.Stack {
         }
     }
 
+    private createAssetBehaviors(origin: IOrigin) {
+        const cached = {
+            origin: origin,
+            viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+            compress: true,
+            cachePolicy: new CachePolicy(this, 'AssetsCachePolicy', {
+                minTtl: cdk.Duration.days(1),
+                maxTtl: cdk.Duration.days(7),
+                defaultTtl: cdk.Duration.days(7),
+            })
+        };
 
+        const additionalBehaviors: { [key: string]: BehaviorOptions } = {};
+        ['js', 'css', 'svg', 'png', 'jpg', 'jpeg', 'gif', 'woff', 'woff2', 'ttf', 'eot',].map((ext) => {
+            additionalBehaviors[`/*.${ext}`] = cached;
+        });
+        return additionalBehaviors;
+    }
 }
