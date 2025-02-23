@@ -5,7 +5,13 @@ import {Certificate, CertificateValidation} from "aws-cdk-lib/aws-certificateman
 import {CloudFrontTarget} from "aws-cdk-lib/aws-route53-targets";
 import {BlockPublicAccess, Bucket} from "aws-cdk-lib/aws-s3";
 import {ServicePrincipal} from "aws-cdk-lib/aws-iam";
-import {BehaviorOptions, CachePolicy, Distribution, ViewerProtocolPolicy} from "aws-cdk-lib/aws-cloudfront";
+import {
+    BehaviorOptions,
+    CachePolicy,
+    Distribution, OriginRequestCookieBehavior, OriginRequestHeaderBehavior,
+    OriginRequestPolicy, OriginRequestQueryStringBehavior,
+    ViewerProtocolPolicy
+} from "aws-cdk-lib/aws-cloudfront";
 import {S3BucketOrigin} from "aws-cdk-lib/aws-cloudfront-origins";
 
 
@@ -79,13 +85,23 @@ export class WebHostingStack extends cdk.Stack {
                         origin: origin,
                         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                         compress: true,
-                        cachePolicy: idxPagePolicy
+                        cachePolicy: idxPagePolicy,
+                        originRequestPolicy: new OriginRequestPolicy(this, 'CallbackOriginRequestPolicy', {
+                            queryStringBehavior: OriginRequestQueryStringBehavior.all(),
+                            cookieBehavior: OriginRequestCookieBehavior.all(),
+                            headerBehavior: OriginRequestHeaderBehavior.all()
+                        })
                     },
                     '/logout*': {
                         origin: origin,
                         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                         compress: true,
-                        cachePolicy: idxPagePolicy
+                        cachePolicy: idxPagePolicy,
+                        originRequestPolicy: new OriginRequestPolicy(this, 'CallbackOriginRequestPolicy', {
+                            queryStringBehavior: OriginRequestQueryStringBehavior.all(),
+                            cookieBehavior: OriginRequestCookieBehavior.all(),
+                            headerBehavior: OriginRequestHeaderBehavior.all()
+                        })
                     }
                 },
                 domainNames: [this.webSubFQDN],
