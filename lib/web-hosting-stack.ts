@@ -68,7 +68,7 @@ export class WebHostingStack extends cdk.Stack {
                 },
                 additionalBehaviors: {
                     ...additionalBehaviors,
-                    '/index.html*': {
+                    '/index.html': {
                         origin: origin,
                         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                         compress: true,
