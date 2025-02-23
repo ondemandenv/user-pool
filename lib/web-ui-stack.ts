@@ -66,6 +66,7 @@ export class WebUiStack extends cdk.Stack {
             ],
             WithDecryption: true
         }));
+        console.log(JSON.stringify(psOut, null, 2));
 
         const bucketNameParamIdx = psOut.Parameters!.findIndex(p => p.Name == bucketNameParamPath)
 
