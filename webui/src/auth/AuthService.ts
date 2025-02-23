@@ -17,7 +17,7 @@ export class AuthService {
         return this._inst
     }
 
-    constructor( config: OdmdConfig) {
+    constructor(config: OdmdConfig) {
         if (AuthService._inst) {
             throw new Error("AuthService._inst must be singleton");
         }
@@ -27,7 +27,10 @@ export class AuthService {
         this.authConfig.region = config.region;
         this.authConfig.identityPoolId = config.IdentityPoolId
         this.authConfig.domain = config.userPoolDomain
-        this.authConfig.redirectUri = `https://${config.webDomain}/callback`
+        this.authConfig.redirectUri = config.webDomain == 'localhost'
+            ? 'http://localhost:5173/callback' : `https://${config.webDomain}/callback`
+        this.authConfig.tokenRefreshInterval = 20 * 60 * 1000
+        this.authConfig.scope = 'email profile openid'
     }
 
     private _credentials: AwsCredentialIdentity | null = null;
@@ -37,18 +40,18 @@ export class AuthService {
 
     private userInfo: UserInfo | null = null;
     private tokenRefreshTimeout?: number;
-    readonly authConfig = {
-        userPoolId: 'us-east-1_GgMY7yMIZ',
-        clientId: '1svotsobb7khpm32u5qnh1r1dg',
-        region: 'us-east-1',
-        identityPoolId: 'us-east-1:62cdfb1f-ce35-4eac-a707-6b8ae3782962',
-        domain: 'auth.ondemandenv.link',
+    readonly authConfig = {} as {
+        userPoolId: string,
+        clientId: string,
+        region: string,
+        identityPoolId: string,
+        domain: string,
 
-        redirectUri: 'http://localhost:5173/callback',
-        scope: 'email profile openid',
+        redirectUri: string,
+        scope: string,
 
-        tokenRefreshInterval: 20 * 60 * 1000,
-    };
+        tokenRefreshInterval: number
+    }
 
 
     initiateGoogleLogin() {

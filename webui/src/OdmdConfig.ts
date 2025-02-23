@@ -32,6 +32,7 @@ export class ConfigService {
             const response = await fetch('/config.json');
             if (!response.ok) throw new Error('Failed to load config');
             this.config = await response.json();
+            console.log( this.config );
         } catch (error) {
             console.error('Error loading config:', error);
             throw error;

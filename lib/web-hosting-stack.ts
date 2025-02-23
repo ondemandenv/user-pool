@@ -18,10 +18,14 @@ export class WebHostingStack extends cdk.Stack {
         super(scope, id, props);
 
         this.bucket = new Bucket(this, 'bucket', {
+            publicReadAccess: false,
             blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
             enforceSSL: true,
-            removalPolicy: cdk.RemovalPolicy.DESTROY
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            websiteIndexDocument: 'index.html',
+            websiteErrorDocument: 'index.html'
         });
+
         const zoneName = props.zoneName
         const hostedZone = HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
             hostedZoneId: props.hostedZoneId,
@@ -52,6 +56,11 @@ export class WebHostingStack extends cdk.Stack {
                 };
             });
 
+            const idxPagePolicy = new CachePolicy(this, 'HtmlCachePolicy', {
+                minTtl: cdk.Duration.seconds(0),
+                maxTtl: cdk.Duration.minutes(2),
+                defaultTtl: cdk.Duration.minutes(1),
+            });
             const distribution = new Distribution(this, 'Distribution', {
                 defaultBehavior: {
                     origin: origin,
@@ -64,11 +73,19 @@ export class WebHostingStack extends cdk.Stack {
                         origin: origin,
                         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                         compress: true,
-                        cachePolicy: new CachePolicy(this, 'HtmlCachePolicy', {
-                            minTtl: cdk.Duration.seconds(0),
-                            maxTtl: cdk.Duration.minutes(2),
-                            defaultTtl: cdk.Duration.minutes(1),
-                        })
+                        cachePolicy: idxPagePolicy
+                    },
+                    '/callback': {
+                        origin: origin,
+                        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                        compress: true,
+                        cachePolicy: idxPagePolicy
+                    },
+                    '/logout': {
+                        origin: origin,
+                        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                        compress: true,
+                        cachePolicy: idxPagePolicy
                     }
                 },
                 domainNames: [this.webSubFQDN],
