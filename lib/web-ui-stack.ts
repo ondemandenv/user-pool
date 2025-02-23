@@ -94,6 +94,7 @@ export class WebUiStack extends cdk.Stack {
         obj.userPoolDomain = this.userPoolDomain
         obj.webDomain = this.webDomain
         obj.visData = JSON.parse(bufferLikeBuffer.toString())
+        obj.pub_time = new Date().toISOString()
 
         const configParams = {
             Bucket: this.targetBucket.bucketName,
@@ -101,7 +102,7 @@ export class WebUiStack extends cdk.Stack {
             Body: JSON.stringify(obj),
             ContentType: 'application/json'
         };
-        const pubConfig = new AwsCustomResource(this, 'S3PutObject', {
+        const pubConfig = new AwsCustomResource(this, 'pubConfig', {
             onCreate: {
                 service: 'S3',
                 action: 'putObject',
