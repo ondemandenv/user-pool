@@ -64,7 +64,7 @@ export class WebHostingStack extends cdk.Stack {
                 additionalBehaviors: {
                     ...additionalBehaviors,
                     '/index.html*': noCaching,
-                    '/config.json': noCaching
+                    '/config*': noCaching
                 },
                 domainNames: [this.webSubFQDN],
                 certificate: new Certificate(this, 'web-Certificate', {

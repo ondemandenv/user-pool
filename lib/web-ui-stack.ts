@@ -4,11 +4,12 @@ import {Construct} from 'constructs';
 import {Bucket} from "aws-cdk-lib/aws-s3";
 import {OdmdEnverUserAuthSbx, OndemandContractsSandbox} from "@ondemandenv/odmd-contracts-sandbox";
 import {AssumeRoleCommand, STSClient} from "@aws-sdk/client-sts";
-import {GetParametersCommand, SSMClient} from "@aws-sdk/client-ssm";
+import {GetParameterCommand, GetParametersCommand, SSMClient} from "@aws-sdk/client-ssm";
 import {UserPool} from "aws-cdk-lib/aws-cognito";
 import {AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId} from "aws-cdk-lib/custom-resources";
 import {GetObjectCommand, S3Client} from "@aws-sdk/client-s3";
 import {Readable} from "node:stream";
+import {Credentials} from "@aws-sdk/client-sts/dist-types/models/models_0";
 
 export class WebUiStack extends cdk.Stack {
 
@@ -31,11 +32,50 @@ export class WebUiStack extends cdk.Stack {
 
         const myEnver = OndemandContractsSandbox.inst.getTargetEnver() as OdmdEnverUserAuthSbx
 
+        const webDeployment = new s3deploy.BucketDeployment(this, 'DeployWebsite', {
+            sources: [s3deploy.Source.asset('webui/dist')],
+            destinationBucket: this.targetBucket,
+        });
+
         const assumeRoleResponse = await new STSClient({region: this.region}).send(new AssumeRoleCommand({
             RoleArn: myEnver.centralRoleArn,
             RoleSessionName: 'getValsFromCentral'
         }));
         const credentials = assumeRoleResponse.Credentials!;
+
+        let values = [myEnver.targetAWSRegion, 'us-west-1'].map(async region => {
+
+            const visDataGqlUrl = await this.getVisDataAndGqUrl(credentials, myEnver.targetAWSRegion,
+                myEnver.appsyncGraphqlUrl.toSharePath(),
+                `/odmd-share/${myEnver.owner.buildId}/${myEnver.targetRevision.toPathPartStr()}/centralBucketName`);
+
+            const regionConfig = {
+                Bucket: this.targetBucket.bucketName,
+                Key: `config_region/${region}.json`,
+                Body: JSON.stringify(visDataGqlUrl),
+                ContentType: 'application/json'
+            };
+
+            new AwsCustomResource(this, 'visDataGqlUrl_' + region, {
+                onCreate: {
+                    service: 'S3',
+                    action: 'putObject',
+                    parameters: regionConfig,
+                    physicalResourceId: PhysicalResourceId.of('s3PutObject')
+                },
+                onUpdate: {
+                    service: 'S3',
+                    action: 'putObject',
+                    parameters: regionConfig,
+                    physicalResourceId: PhysicalResourceId.of('s3PutObject')
+                },
+                policy: AwsCustomResourcePolicy.fromSdkCalls({
+                    resources: [this.targetBucket.arnForObjects('*')]
+                })
+            }).node.addDependency(webDeployment)
+
+        });
+        await Promise.allSettled(values)
 
         const ssmClient = new SSMClient({
             region: this.region,
@@ -45,44 +85,20 @@ export class WebUiStack extends cdk.Stack {
                 sessionToken: credentials.SessionToken
             },
         });
-        const s3Client = new S3Client({
-            region: this.region,
-            credentials: {
-                accessKeyId: credentials.AccessKeyId!,
-                secretAccessKey: credentials.SecretAccessKey!,
-                sessionToken: credentials.SessionToken
-            }
-        })
 
-        const bucketNameParamPath = `/odmd-share/${myEnver.owner.buildId}/${myEnver.targetRevision.toPathPartStr()}/centralBucketName`;
-        const psOut = await ssmClient.send(new GetParametersCommand({
+        const authParams = await ssmClient.send(new GetParametersCommand({
             Names: [
                 myEnver.idProviderClientId.toSharePath(),
                 myEnver.idProviderName.toSharePath(),
-                myEnver.appsyncGraphqlUrl.toSharePath(),
                 myEnver.identityPoolId.toSharePath(),
                 //D:\odmd\seed\ONDEMAND_CENTRAL_REPO\src\lib\appsync\AppsyncBackendStack.ts
-                bucketNameParamPath
+                // bucketNameParamPath
             ],
             WithDecryption: true
         }));
-        console.log(JSON.stringify(psOut, null, 2));
+        console.log(JSON.stringify(authParams, null, 2));
 
-        const bucketNameParamIdx = psOut.Parameters!.findIndex(p => p.Name == bucketNameParamPath)
-
-        const ps = psOut.Parameters!
-        const visDataOut = await s3Client.send(new GetObjectCommand({
-            Bucket: ps.splice(bucketNameParamIdx, 1)[0]!.Value!,
-            Key: 'odmd.vis.data.json'
-        }))
-
-        const bodyStream = visDataOut.Body as Readable;
-        const bufferLikeBuffer = await new Promise<Buffer>((resolve, reject) => {
-            const chunks: Buffer[] = [];
-            bodyStream.on('data', (chunk) => chunks.push(chunk));
-            bodyStream.on('end', () => resolve(Buffer.concat(chunks)));
-            bodyStream.on('error', reject);
-        });
+        const ps = authParams.Parameters!
 
         const obj = {} as { [k: string]: any };
         ps.forEach(p => {
@@ -93,7 +109,6 @@ export class WebUiStack extends cdk.Stack {
         obj.userPoolId = this.userPool.userPoolId
         obj.userPoolDomain = this.userPoolDomain
         obj.webDomain = this.webDomain
-        obj.visData = JSON.parse(bufferLikeBuffer.toString())
         obj.pub_time = new Date().toISOString()
 
         const configParams = {
@@ -102,7 +117,7 @@ export class WebUiStack extends cdk.Stack {
             Body: JSON.stringify(obj),
             ContentType: 'application/json'
         };
-        const pubConfig = new AwsCustomResource(this, 'pubConfig', {
+        new AwsCustomResource(this, 'pubConfig', {
             onCreate: {
                 service: 'S3',
                 action: 'putObject',
@@ -118,15 +133,42 @@ export class WebUiStack extends cdk.Stack {
             policy: AwsCustomResourcePolicy.fromSdkCalls({
                 resources: [this.targetBucket.arnForObjects('*')]
             })
-        });
-
-        pubConfig.node.addDependency(
-            new s3deploy.BucketDeployment(this, 'DeployWebsite', {
-                sources: [s3deploy.Source.asset('webui/dist')],
-                destinationBucket: this.targetBucket,
-            })
+        }).node.addDependency(
+            webDeployment
         )
+
 
     }
 
+    private async getVisDataAndGqUrl(creds: Credentials, region: string,
+                                     appsyncGraphqlUrlPath: string,
+                                     visDataBucketPath: string) {
+        const credentials = {
+            accessKeyId: creds.AccessKeyId!,
+            secretAccessKey: creds.SecretAccessKey!,
+            sessionToken: creds.SessionToken
+        };
+        const ssmClient = new SSMClient({region, credentials});
+
+        const regionParamOut = await ssmClient.send(
+            new GetParametersCommand({
+                Names: [visDataBucketPath, appsyncGraphqlUrlPath]
+            }))
+
+        const s3Client = new S3Client({region, credentials})
+        const visDataOut = await s3Client.send(new GetObjectCommand({
+            Bucket: regionParamOut.Parameters!.find(p => p.Name == visDataBucketPath)!.Value,
+            Key: 'odmd.vis.data.json'
+        }))
+
+        const bodyStream = visDataOut.Body as Readable;
+        const bufferLikeBuffer = await new Promise<Buffer>((resolve, reject) => {
+            const chunks: Buffer[] = [];
+            bodyStream.on('data', (chunk) => chunks.push(chunk));
+            bodyStream.on('end', () => resolve(Buffer.concat(chunks)));
+            bodyStream.on('error', reject);
+        });
+        return [bufferLikeBuffer.toString(),
+            regionParamOut.Parameters!.find(p => p.Name == appsyncGraphqlUrlPath)!.Value!]
+    }
 }
