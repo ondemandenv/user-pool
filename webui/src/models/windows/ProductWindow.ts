@@ -44,7 +44,7 @@ export class ProductWindow extends FloatingWindow<ProductNode> {
                     credentials: AuthService.instance.credentials
                 });
                 const response = await ssm.send(new GetParameterHistoryCommand({
-                    Name: this.node.param?.Name
+                    Name: this.node.param!.Name
                 }));
                 this.paramHistory = response.Parameters;
             } catch (error) {

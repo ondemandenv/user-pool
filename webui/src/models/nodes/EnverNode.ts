@@ -97,7 +97,7 @@ export class EnverNode extends OdmdNode<EnverWindow> {
 
         let wflStatusJstr = this.parameters.get(this.workflowStatusPath)?.Value;
         if (wflStatusJstr) {
-            wflStatusJstr =  `WFL status: ${wflStatusJstr}<br>trigger msg: ${this.parameters.get(this.workflowTriggerMsgPath)?.Value}`
+            wflStatusJstr = `WFL status: ${wflStatusJstr}<br>trigger msg: ${this.parameters.get(this.workflowTriggerMsgPath)?.Value}`
         }
 
         return {
@@ -176,15 +176,13 @@ ${wflStatusJstr ?? 'Never ran ...'}
     async onReady() {
 
         this.consumptionEdges.forEach(consumptionEdge => {
-            const tmp = this;
-            console.log('eee.' + this.entity)
-            console.log('tt.' + tmp)
             const [b, e, p] = consumptionEdge.to.split('/')
-
             const pEnverNode = this.graph.odmdNodes.get(b + '/' + e)! as EnverNode
-            pEnverNode.productNodes
-                .find(pn => pn.entity.id == consumptionEdge.to)!
-                .addConsumer(consumptionEdge)
+            if (pEnverNode) {
+                const found = pEnverNode.productNodes
+                    .find(pn => pn.entity.id == consumptionEdge.to);
+                found?.addConsumer(consumptionEdge)
+            }
         })
 
         ParamService.getInstance().fetchParams(
