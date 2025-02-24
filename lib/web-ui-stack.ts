@@ -4,7 +4,7 @@ import {Construct} from 'constructs';
 import {Bucket} from "aws-cdk-lib/aws-s3";
 import {OdmdEnverUserAuthSbx, OndemandContractsSandbox} from "@ondemandenv/odmd-contracts-sandbox";
 import {AssumeRoleCommand, STSClient} from "@aws-sdk/client-sts";
-import {GetParameterCommand, GetParametersCommand, SSMClient} from "@aws-sdk/client-ssm";
+import {GetParametersCommand, SSMClient} from "@aws-sdk/client-ssm";
 import {UserPool} from "aws-cdk-lib/aws-cognito";
 import {AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId} from "aws-cdk-lib/custom-resources";
 import {GetObjectCommand, S3Client} from "@aws-sdk/client-s3";
@@ -42,12 +42,14 @@ export class WebUiStack extends cdk.Stack {
             RoleSessionName: 'getValsFromCentral'
         }));
         const credentials = assumeRoleResponse.Credentials!;
+        const now = new Date().toISOString();
 
-        let values = [myEnver.targetAWSRegion, 'us-west-1'].map(async region => {
+        const values = [myEnver.targetAWSRegion, 'us-west-1'].map(async region => {
 
             const visDataGqlUrl = await this.getVisDataAndGqUrl(credentials, region,
                 myEnver.appsyncGraphqlUrl.toSharePath(),
                 `/odmd-share/${myEnver.owner.buildId}/${myEnver.targetRevision.toPathPartStr()}/centralBucketName`);
+            visDataGqlUrl.push(now)
 
             const regionConfig = {
                 Bucket: this.targetBucket.bucketName,
@@ -109,7 +111,7 @@ export class WebUiStack extends cdk.Stack {
         obj.userPoolId = this.userPool.userPoolId
         obj.userPoolDomain = this.userPoolDomain
         obj.webDomain = this.webDomain
-        obj.pub_time = new Date().toISOString()
+        obj.pub_time = now
 
         const configParams = {
             Bucket: this.targetBucket.bucketName,
