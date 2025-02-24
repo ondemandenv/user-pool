@@ -44,7 +44,7 @@ export class WebUiStack extends cdk.Stack {
         const credentials = assumeRoleResponse.Credentials!;
         const now = new Date().toISOString();
 
-        const values = [myEnver.targetAWSRegion, 'us-west-1'].map(async region => {
+        const csDeployRslt = await Promise.allSettled([myEnver.targetAWSRegion, 'us-west-1'].map(async region => {
 
             const visDataGqlUrl = await this.getVisDataAndGqUrl(credentials, region,
                 myEnver.appsyncGraphqlUrl.toSharePath(),
@@ -75,9 +75,11 @@ export class WebUiStack extends cdk.Stack {
                     resources: [this.targetBucket.arnForObjects('*')]
                 })
             }).node.addDependency(webDeployment)
-
-        });
-        await Promise.allSettled(values)
+        }))
+        const rejected = csDeployRslt.find(d => d.status == 'rejected');
+        if (rejected) {
+            throw new Error(rejected.reason)
+        }
 
         const ssmClient = new SSMClient({
             region: this.region,
