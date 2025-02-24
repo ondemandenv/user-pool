@@ -1,7 +1,7 @@
 import {CognitoIdentityClient} from "@aws-sdk/client-cognito-identity";
 import {fromCognitoIdentityPool} from "@aws-sdk/credential-provider-cognito-identity";
 import {AwsCredentialIdentity} from "@aws-sdk/types";
-import {OdmdConfig} from "../OdmdConfig.ts";
+import {AuthConfig} from "../OdmdConfig.ts";
 
 interface UserInfo {
     name: string;
@@ -17,7 +17,7 @@ export class AuthService {
         return this._inst
     }
 
-    constructor(config: OdmdConfig) {
+    constructor(config: AuthConfig) {
         if (AuthService._inst) {
             throw new Error("AuthService._inst must be singleton");
         }
@@ -27,7 +27,7 @@ export class AuthService {
         this.authConfig.region = config.region;
         this.authConfig.identityPoolId = config.IdentityPoolId
         this.authConfig.domain = config.userPoolDomain
-        this.authConfig.redirectUri = config.webDomain == 'localhost'
+        this.authConfig.redirectUri = window.location.hostname == 'localhost'
             ? 'http://localhost:5173/index.html?callback'
             : `https://${config.webDomain}/index.html?callback`
         this.authConfig.tokenRefreshInterval = 20 * 60 * 1000

@@ -45,7 +45,7 @@ export class WebUiStack extends cdk.Stack {
 
         let values = [myEnver.targetAWSRegion, 'us-west-1'].map(async region => {
 
-            const visDataGqlUrl = await this.getVisDataAndGqUrl(credentials, myEnver.targetAWSRegion,
+            const visDataGqlUrl = await this.getVisDataAndGqUrl(credentials, region,
                 myEnver.appsyncGraphqlUrl.toSharePath(),
                 `/odmd-share/${myEnver.owner.buildId}/${myEnver.targetRevision.toPathPartStr()}/centralBucketName`);
 

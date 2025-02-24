@@ -94,7 +94,7 @@ async function main() {
 
     const config = await ConfigService.getInstance()
 
-    const auth = new AuthService(config);
+    const auth = new AuthService(config.authConfig);
 
     // Handle OAuth callback
     const url = new URL(window.location.href);
@@ -116,7 +116,7 @@ async function main() {
         <div id="auth-container"></div>
     `;
 
-    const allBuildEntities = config.visData
+    const allBuildEntities = config.gqlConfig.visData
     buildSelectionPanel(allBuildEntities.map(i => i.id));
 
     // Handle authentication UI
@@ -132,7 +132,7 @@ async function main() {
             await auth.refreshCredentials()
         }
 
-        new GraphQlService(auth.credentials!, config);
+        new GraphQlService(auth.credentials!, config.gqlConfig);
 
         authContainer!.innerHTML = `
             <div class="user-info">
