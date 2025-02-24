@@ -168,7 +168,7 @@ export class WebUiStack extends cdk.Stack {
             bodyStream.on('end', () => resolve(Buffer.concat(chunks)));
             bodyStream.on('error', reject);
         });
-        return [bufferLikeBuffer.toString(),
+        return [JSON.parse(bufferLikeBuffer.toString()),
             regionParamOut.Parameters!.find(p => p.Name == appsyncGraphqlUrlPath)!.Value!]
     }
 }
