@@ -22,15 +22,15 @@ export class ConfigService {
     gqlConfig!: GqlConfig;
 
 
-    public static async getInstance(): Promise<ConfigService> {
+    public static async getInstance(region: string): Promise<ConfigService> {
         if (!ConfigService.instance) {
             ConfigService.instance = new ConfigService();
-            await ConfigService.instance.loadConfig('us-west-1');
+            await ConfigService.instance.loadConfig(region);
         }
         return ConfigService.instance;
     }
 
-    private async loadConfig(region: 'us-west-1' | 'us-east-1'): Promise<void> {
+    private async loadConfig(region: string): Promise<void> {
 
         const arr = await Promise.all(
             ['/config.json', `/config_region/${region}.json`,].map(async p => {

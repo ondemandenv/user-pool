@@ -5,14 +5,30 @@ import {AuthService} from "./auth/AuthService.ts";
 import {BuildNode} from "./models/nodes/BuildNode.ts";
 import {ConfigService} from "./OdmdConfig.ts";
 
+window.location.search.startsWith('?region=')
+const regFromUrl = window.location.search.substring('?region='.length)
+
+const supportedRegions = ['us-east-1', 'us-west-1'];
+const region = supportedRegions.includes(regFromUrl) ? regFromUrl : 'us-east-1'
+const regionToBuildIds = {
+    "us-east-1": [
+        'OdmdBuildUserAuth',
+        'LlmChatLambdaS3',
+        'VisLlmOdmdData-shop-foundation',
+        'FapiErc20Build',
+    ],
+    'us-west-1': [
+        'sampleSpringOpenAPI3img',
+        'sampleSpringOpenAPI3cdk',
+        'coffee-shop-foundation',
+        'coffeeShopOrderProcessor',
+        'coffeeShopOrderManage',
+    ]
+} as { [key: string]: string[] }
+
+
 const cachedSelected = localStorage.getItem('_selectedBuildIds');//, JSON.stringify(Array.from(_selectedBuildIds)))
-const _selectedBuildIds = new Set<string>(cachedSelected ? JSON.parse(cachedSelected) : [
-    'sampleSpringOpenAPI3img',
-    'sampleSpringOpenAPI3cdk',
-    'coffee-shop-foundation',
-    'coffeeShopOrderProcessor',
-    'coffeeShopOrderManage',
-])
+const _selectedBuildIds = new Set<string>(cachedSelected ? JSON.parse(cachedSelected) : regionToBuildIds[region]!)
 
 function buildSelectionPanel(allBuildIds: string[]) {
     // Create build selection panel
@@ -89,10 +105,9 @@ function buildSelectionPanel(allBuildIds: string[]) {
     document.querySelector('#app')?.appendChild(buildPanel);
 }
 
-
 async function main() {
 
-    const config = await ConfigService.getInstance()
+    const config = await ConfigService.getInstance(region)
 
     const auth = new AuthService(config.authConfig);
 
