@@ -4,7 +4,6 @@ import {GraphQlService} from "./gql/GraphQlService.ts";
 import {AuthService, OdmdUserInfo} from "./auth/AuthService.ts";
 import {BuildNode} from "./models/nodes/BuildNode.ts";
 import {ConfigService} from "./OdmdConfig.ts";
-import {UserInfo} from "node:os";
 
 window.location.search.startsWith('?region=')
 const regFromUrl = window.location.search.substring('?region='.length)
