@@ -3,10 +3,10 @@ import {fromCognitoIdentityPool} from "@aws-sdk/credential-provider-cognito-iden
 import {AwsCredentialIdentity} from "@aws-sdk/types";
 import {AuthConfig} from "../OdmdConfig.ts";
 
-interface UserInfo {
+export interface OdmdUserInfo {
     name: string;
     email: string;
-    picture?: string;
+    cogGroups?: string[];
 }
 
 export class AuthService {
@@ -41,7 +41,7 @@ export class AuthService {
         return this._credentials;
     }
 
-    private userInfo: UserInfo | null = null;
+    private userInfo: OdmdUserInfo | null = null;
     private tokenRefreshTimeout?: number;
     readonly authConfig = {} as {
         userPoolId: string,
@@ -119,7 +119,7 @@ export class AuthService {
         this.userInfo = {
             name: payload.name,
             email: payload.email,
-            picture: payload.picture
+            cogGroups: payload["cognito:groups"]
         };
 
         localStorage.setItem('id_token', idToken);

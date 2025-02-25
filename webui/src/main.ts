@@ -1,9 +1,10 @@
 import "./style.css"
 import {NetworkGraph} from './NetworkGraph';
 import {GraphQlService} from "./gql/GraphQlService.ts";
-import {AuthService} from "./auth/AuthService.ts";
+import {AuthService, OdmdUserInfo} from "./auth/AuthService.ts";
 import {BuildNode} from "./models/nodes/BuildNode.ts";
 import {ConfigService} from "./OdmdConfig.ts";
+import {UserInfo} from "node:os";
 
 window.location.search.startsWith('?region=')
 const regFromUrl = window.location.search.substring('?region='.length)
@@ -141,7 +142,7 @@ async function main() {
     // Initialize network graph
     const network = new NetworkGraph('network-container');
     if (userInfo) {
-        const user = JSON.parse(userInfo);
+        const user = JSON.parse(userInfo) as OdmdUserInfo
 
         if (!auth.credentials) {
             await auth.refreshCredentials()
@@ -151,8 +152,8 @@ async function main() {
 
         authContainer!.innerHTML = `
             <div class="user-info">
-                ${user.picture ? `<img src="${user.picture}" alt="${user.name}">` : ''}
-                <span>${user.email}</span>
+                ${user.email}
+                [<span>${user.cogGroups?.join()}</span>]
                 <button id="logout-button">Logout</button>
             </div>
         `;
