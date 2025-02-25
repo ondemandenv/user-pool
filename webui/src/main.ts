@@ -152,7 +152,7 @@ async function main() {
         authContainer!.innerHTML = `
             <div class="user-info">
                 ${user.picture ? `<img src="${user.picture}" alt="${user.name}">` : ''}
-                <span>${user.name}</span>
+                <span>${user.email}</span>
                 <button id="logout-button">Logout</button>
             </div>
         `;
