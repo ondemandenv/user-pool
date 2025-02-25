@@ -9,7 +9,7 @@ window.location.search.startsWith('?region=')
 const regFromUrl = window.location.search.substring('?region='.length)
 
 const supportedRegions = ['us-east-1', 'us-west-1'];
-const region = supportedRegions.includes(regFromUrl) ? regFromUrl : 'us-east-1'
+const region = supportedRegions.includes(regFromUrl) ? regFromUrl : 'us-west-1'
 const regionToBuildIds = {
     "us-east-1": [
         'OdmdBuildUserAuth',
