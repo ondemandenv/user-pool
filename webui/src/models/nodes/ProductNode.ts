@@ -49,8 +49,7 @@ export class ProductNode extends OdmdNode<ProductWindow> {
 </div>
 `;
         } else {
-            const userInfo = localStorage.getItem('user_info');
-            if (userInfo) {
+            if (localStorage.getItem('user_info')) {
                 text = '<div style="color: orange;">Version information unavailable. Enver not deployed.</div>';
             } else {
                 text = '<div style="color: grey;">Login to view version details.</div>';

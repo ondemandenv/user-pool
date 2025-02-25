@@ -143,7 +143,7 @@ ${this.workflowStatusPath}
 <br>
 Version: ${lastVer} updated on ${lastUpdate}
 <br>
-${wflStatusJstr ?? 'Never ran ...'}
+${wflStatusJstr ?? localStorage.getItem('user_info') ? 'Never ran ...' : 'Login to see details'}
 </div>
       `,
             style: {maxWidth: '350px'} // Increased style maxWidth to match content maxWidth

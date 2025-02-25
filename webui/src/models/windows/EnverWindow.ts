@@ -9,7 +9,7 @@ export class EnverWindow extends FloatingWindow<EnverNode> {
         const lastUpdate = workflowStatus?.LastModifiedDate?.toString() ?? 'n/a';
 
         let wflStatusJson: any = null;
-        let wflStatusString: string = 'Never ran ...';
+        let wflStatusString: string = localStorage.getItem('user_info') ? 'Never ran ...' : 'Login to see details'
 
         if (workflowStatus?.Value) {
             try {
