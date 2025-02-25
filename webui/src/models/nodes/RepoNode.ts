@@ -86,7 +86,7 @@ export class RepoNode extends OdmdNode<RepoWindow> {
     }
 
     onData(change: { operation: 'Delete' | 'Update' | 'Create'; name: string; type: string; }): void {
-        throw new Error('Method not implemented.');
+        console.warn(`not implemented ${JSON.stringify(change, undefined, 4)}`);
     }
 
 } 
