@@ -8,8 +8,8 @@ import {TooltipOptions} from "../Tooltip.ts";
 import {EnverWindow} from "../windows/EnverWindow.ts";
 import {ParamService} from "../../ssm/ParamService.ts";
 import {Parameter} from "@aws-sdk/client-ssm";
-import {AuthService} from "../../auth/AuthService.ts";
 import {BuildNode} from "./BuildNode.ts";
+import {HttpGraphQLClient} from "../../gql/HttpGraphQLClient.ts";
 
 export class EnverNode extends OdmdNode<EnverWindow> {
 
@@ -63,7 +63,7 @@ export class EnverNode extends OdmdNode<EnverWindow> {
             this.consumptionEdges.push(consumptionEdge);
         })
 
-        const wflName = `ODMD_${this.buildId}-${this.csResType}${AuthService.instance.authConfig.region}-${this.account[0]}`;
+        const wflName = `ODMD_${this.buildId}-${this.csResType}${HttpGraphQLClient.inst.region}-${this.account[0]}`;
         this.workflowStatusPath = `/odmd-github/${this.buildNode.repo}/${this.revRefPathPart.split('..').pop()}/.github/workflows/${wflName}.yaml`
         this.workflowTriggerMsgPath = this.workflowStatusPath + `/triggerMsg`
 
