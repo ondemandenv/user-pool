@@ -19,6 +19,8 @@ const regionToBuildIds = {
         'FapiErc20Build',
     ],
     'us-west-1': [
+        'networking',
+        'eks-cluster-sbx',
         'sampleSpringOpenAPI3img',
         'sampleSpringOpenAPI3cdk',
         'coffee-shop-foundation',
