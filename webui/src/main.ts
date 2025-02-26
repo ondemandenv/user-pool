@@ -10,6 +10,7 @@ const regFromUrl = window.location.search.substring('?region='.length)
 
 const supportedRegions = ['us-east-1', 'us-west-1'];
 const region = supportedRegions.includes(regFromUrl) ? regFromUrl : 'us-west-1'
+GraphQlService.region = region
 const regionToBuildIds = {
     "us-east-1": [
         'OdmdBuildUserAuth',

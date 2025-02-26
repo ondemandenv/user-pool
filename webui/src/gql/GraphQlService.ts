@@ -1,7 +1,7 @@
 import {AwsCredentialIdentity} from "@aws-sdk/types";
 import {HttpGraphQLClient} from "./HttpGraphQLClient.ts";
 import {WbskGraphQLClient} from "./WbskGraphQLClient.ts";
-import {AuthConfig, GqlConfig} from "../OdmdConfig.ts";
+import {GqlConfig} from "../OdmdConfig.ts";
 
 export class GraphQlService {
 
@@ -10,6 +10,7 @@ export class GraphQlService {
         wssEndpoint: string,
         region: string,
     };
+    static region: string;
 
     constructor(creds: AwsCredentialIdentity, config: GqlConfig) {
         const tmp = config.appsyncGraphqlUrl.replace('.appsync-api.', '.appsync-realtime-api.').split(':')

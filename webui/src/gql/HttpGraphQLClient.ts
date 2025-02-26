@@ -32,12 +32,10 @@ export class HttpGraphQLClient {
         return this._inst
     }
 
-    readonly region:string
     constructor(credentials: AwsCredentialIdentity,
                         httpEndpoint: string,
                         region: string
     ) {
-        this.region = region;
         this.httpEndpoint = httpEndpoint;
         this.credentials = credentials;
         this.signer = new SignatureV4({

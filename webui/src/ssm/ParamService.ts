@@ -1,6 +1,6 @@
 import {GetParametersCommand, Parameter, SSMClient} from "@aws-sdk/client-ssm";
 import {AuthService} from "../auth/AuthService.ts";
-import {HttpGraphQLClient} from "../gql/HttpGraphQLClient.ts";
+import {GraphQlService} from "../gql/GraphQlService.ts";
 
 
 export class ParamService {
@@ -15,7 +15,7 @@ export class ParamService {
         ParamService.instance = this;
 
         this.ssmClient = new SSMClient({
-            region: HttpGraphQLClient.inst.region,
+            region: GraphQlService.region,
             credentials: AuthService.instance.credentials!
         });
     }
@@ -31,7 +31,7 @@ export class ParamService {
 
     public fetchParams(names: string[], handler: (callback: Parameter | string) => void): void {
         [...new Set(names)].forEach(name => {
-            if (this.queuedNames.indexOf(name) < 0){
+            if (this.queuedNames.indexOf(name) < 0) {
                 this._nameToHandler.set(name, handler)
                 this.queuedNames.push(name);
             }
