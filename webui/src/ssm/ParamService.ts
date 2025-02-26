@@ -1,5 +1,6 @@
 import {GetParametersCommand, Parameter, SSMClient} from "@aws-sdk/client-ssm";
 import {AuthService} from "../auth/AuthService.ts";
+import {HttpGraphQLClient} from "../gql/HttpGraphQLClient.ts";
 
 
 export class ParamService {
@@ -14,7 +15,7 @@ export class ParamService {
         ParamService.instance = this;
 
         this.ssmClient = new SSMClient({
-            region: AuthService.instance.authConfig.region,
+            region: HttpGraphQLClient.inst.region,
             credentials: AuthService.instance.credentials!
         });
     }
