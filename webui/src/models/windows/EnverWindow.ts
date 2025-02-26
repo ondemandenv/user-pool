@@ -1,5 +1,5 @@
-import { FloatingWindow, FloatingWindowOptions } from "../FloatingWindow.ts";
-import { EnverNode } from "../nodes/EnverNode.ts";
+import {FloatingWindow, FloatingWindowOptions} from "../FloatingWindow.ts";
+import {EnverNode} from "../nodes/EnverNode.ts";
 
 export class EnverWindow extends FloatingWindow<EnverNode> {
 
@@ -23,8 +23,8 @@ export class EnverWindow extends FloatingWindow<EnverNode> {
         }
 
 
-        const ctlPpStack = this.node.parameters.get(this.node.ctlPpStackPath)?.Value ?? 'N/A';
-        const centralStack = this.node.parameters.get(this.node.centralStackPath)?.Value ?? 'N/A';
+        const ctlPpStack = this.node.parameters.get(this.node.ctlPpStackPath)?.Value ?? 'NotFound';
+        const centralStack = this.node.parameters.get(this.node.centralStackPath)?.Value ?? 'NotFound';
 
 
         return {
@@ -38,10 +38,13 @@ export class EnverWindow extends FloatingWindow<EnverNode> {
   
   <label for="ta">Odmd Status:</label><br>
   <textarea id="ta" readonly style="width: 95%; height: 150px; resize: both;">
+Workflow status:
 ${wflStatusString}
-
+------------------------
+Ctl Stack:
 ${ctlPpStack}
-
+------------------------
+Central Stack:
 ${centralStack}
 </textarea>
 </div>
