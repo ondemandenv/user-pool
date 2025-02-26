@@ -11,9 +11,11 @@ export class EnverWindowCdk extends EnverWindow {
 
     refreshWindowOptions(): FloatingWindowOptions {
         const ret = super.refreshWindowOptions();
-        const stackParams = this.cdkNode.stackNamePaths.map(sp => {
-                let stk = this.cdkNode.parameters.get(sp);
-                return `
+        let contents: string[];
+        if (localStorage.getItem('user_info')) {
+            contents = this.cdkNode.stackNamePaths.map(sp => {
+                    let stk = this.cdkNode.parameters.get(sp);
+                    return `
 <div>
 ${stk?.ARN}
 <br>
@@ -22,10 +24,13 @@ ${stk?.Value}
 </textarea>
 </div>
 `
-            }
-        );
+                }
+            );
+        } else {
+            contents = [`Login to see details of ${this.cdkNode.stackNamePaths.length}: stacks`];
+        }
 
-        ret.content += stackParams.join('<br>')
+        ret.content += contents.join('<br>')
         return ret;
     }
 }
