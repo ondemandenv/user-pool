@@ -26,7 +26,6 @@ export class EnverWindow extends FloatingWindow<EnverNode> {
         const ctlPpStack = this.node.parameters.get(this.node.ctlPpStackPath)?.Value ?? 'NotFound';
         const centralStack = this.node.parameters.get(this.node.centralStackPath)?.Value ?? 'NotFound';
 
-
         return {
             title: this.node.entity.id,
             content: `
