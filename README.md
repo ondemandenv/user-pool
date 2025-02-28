@@ -55,3 +55,7 @@ new OdmdShareOut(this, new Map<OdmdCrossRefProducer<OdmdEnverUserAuth>, any>([
     [myEnver.idProviderName, `cognito-idp.${Stack.of(this).region}.amazonaws.com/${userPool.userPoolId}`],
     [myEnver.idProviderClientId, oauthUserpoolClient.userPoolClientId]
 ]));
+```
+
+https://web.auth.ondemandenv.link/
+This is web console of https://github.com/ondemandenv which is an example usage of https://ondemandenv.dev
