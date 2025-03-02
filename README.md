@@ -59,3 +59,6 @@ new OdmdShareOut(this, new Map<OdmdCrossRefProducer<OdmdEnverUserAuth>, any>([
 
 https://web.auth.ondemandenv.link/
 This is web console of https://github.com/ondemandenv which is an example usage of https://ondemandenv.dev
+
+Read my articles to understand the design:
+https://www.linkedin.com/in/garyy2011/recent-activity/all/
