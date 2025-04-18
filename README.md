@@ -14,8 +14,6 @@ This project demonstrates best practices for:
 - Secure authentication integration with Cognito User Pools
 - Configuration sharing between backend and frontend components
 
-
-
 ## ✨ Key Features
 
 - **Infrastructure-as-Code** with AWS CDK TypeScript
