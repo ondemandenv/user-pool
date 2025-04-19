@@ -44,41 +44,47 @@ export class WebUiStack extends cdk.Stack {
         const credentials = assumeRoleResponse.Credentials!;
         const now = new Date().toISOString();
 
-        const csDeployRslt = await Promise.allSettled([myEnver.targetAWSRegion, 'us-west-1'].map(async region => {
+        const csDeployRslt = await Promise.allSettled([myEnver.targetAWSRegion, 'us-west-1']
+            .map(async region => {
 
-            const visDataGqlUrl = await this.getVisDataAndGqUrl(credentials, region,
-                myEnver.appsyncGraphqlUrl.toSharePath(),
-                `/odmd-share/${myEnver.owner.buildId}/${myEnver.targetRevision.toPathPartStr()}/centralBucketName`);
-            visDataGqlUrl.push(now)
+                const visDataGqlUrl = await this.getVisDataAndGqUrl(credentials, region,
+                    myEnver.appsyncGraphqlUrl.toSharePath(),
+                    `/odmd-share/${myEnver.owner.buildId}/${myEnver.targetRevision.toPathPartStr()}/centralBucketName`);
+                visDataGqlUrl.push(now)
 
-            const regionConfig = {
-                Bucket: this.targetBucket.bucketName,
-                Key: `config_region/${region}.json`,
-                Body: JSON.stringify(visDataGqlUrl),
-                ContentType: 'application/json'
-            };
+                const regionConfig = {
+                    Bucket: this.targetBucket.bucketName,
+                    Key: `config_region/${region}.json`,
+                    Body: JSON.stringify(visDataGqlUrl),
+                    ContentType: 'application/json'
+                };
 
-            new AwsCustomResource(this, 'visDataGqlUrl_' + region, {
-                onCreate: {
-                    service: 'S3',
-                    action: 'putObject',
-                    parameters: regionConfig,
-                    physicalResourceId: PhysicalResourceId.of('s3PutObject')
-                },
-                onUpdate: {
-                    service: 'S3',
-                    action: 'putObject',
-                    parameters: regionConfig,
-                    physicalResourceId: PhysicalResourceId.of('s3PutObject')
-                },
-                policy: AwsCustomResourcePolicy.fromSdkCalls({
-                    resources: [this.targetBucket.arnForObjects('*')]
-                })
-            }).node.addDependency(webDeployment)
-        }))
+                new AwsCustomResource(this, 'visDataGqlUrl_' + region, {
+                    onCreate: {
+                        service: 'S3',
+                        action: 'putObject',
+                        parameters: regionConfig,
+                        physicalResourceId: PhysicalResourceId.of('s3PutObject')
+                    },
+                    onUpdate: {
+                        service: 'S3',
+                        action: 'putObject',
+                        parameters: regionConfig,
+                        physicalResourceId: PhysicalResourceId.of('s3PutObject')
+                    },
+                    policy: AwsCustomResourcePolicy.fromSdkCalls({
+                        resources: [this.targetBucket.arnForObjects('*')]
+                    })
+                }).node.addDependency(webDeployment)
+            })
+        )
+        if (!csDeployRslt.find(d => d.status == 'fulfilled')) {
+            throw new Error(`ALL failed, NO REGION's appsync deployed at all? `)
+        }
         const rejected = csDeployRslt.find(d => d.status == 'rejected');
         if (rejected) {
-            throw new Error(rejected.reason)
+            console.log(rejected.reason)
+            console.warn(`could because the region's appsync never got deployed ... ?`)
         }
 
         const ssmClient = new SSMClient({
