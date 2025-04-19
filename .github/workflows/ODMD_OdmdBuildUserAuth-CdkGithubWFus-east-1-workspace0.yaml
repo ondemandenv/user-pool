@@ -46,7 +46,14 @@ jobs:
       - name: run enver local script
         run: |
           set -ex
-          cd ${{ env.ODMD_work_dir }}
+    
+          if [[ -n "${{ env.ODMD_work_dir }}" ]]; then
+            cd "${{ env.ODMD_work_dir }}"
+            echo "Changed directory to ${{ env.ODMD_work_dir }}"
+          else
+            echo "ODMD_work_dir is empty, staying in current directory"
+          fi
+          
           env | grep -i ^ODMD
           pwd
           
