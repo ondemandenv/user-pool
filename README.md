@@ -5,6 +5,9 @@
 
 An end-to-end vertical implementation demonstrating application-centric AWS infrastructure with cross-stack dependencies management and contract-based configuration sharing.
 
+
+
+
 ## 📋 Overview
 
 This project demonstrates best practices for:
