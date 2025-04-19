@@ -54,6 +54,7 @@ jobs:
             echo "ODMD_work_dir is empty, staying in current directory"
           fi
           
+          
           env | grep -i ^ODMD
           pwd
           
