@@ -8,8 +8,6 @@ An end-to-end vertical implementation demonstrating application-centric AWS infr
 
 
 
-
-
 ## 📋 Overview
 
 This project demonstrates best practices for:
