@@ -1,0 +1,50 @@
+[
+  [
+    {
+      "id": "odmd-contracts-npm",
+      "content": "{\"envers\":[{\"id\":\"odmd-contracts-npm/b..__placeholder\",\"content\":\"{\\\"account\\\":[\\\"workspace0\\\",\\\"975050243618\\\"],\\\"csResType\\\":\\\"CmdsGH\\\",\\\"products\\\":[{\\\"id\\\":\\\"odmd-contracts-npm/b..__placeholder/contractsLibLatest\\\"}],\\\"consumings\\\":[]}\"}],\"repo\":{\"owner\":\"ondemandenv\",\"name\":\"odmd-contracts-sandbox\",\"ghAppInstallID\":41561130}}"
+    },
+    {
+      "id": "OdmdBuildUserAuth",
+      "content": "{\"envers\":[{\"id\":\"OdmdBuildUserAuth/b..main\",\"content\":\"{\\\"account\\\":[\\\"workspace0\\\",\\\"975050243618\\\"],\\\"csResType\\\":\\\"CdkGithubWF\\\",\\\"products\\\":[{\\\"id\\\":\\\"OdmdBuildUserAuth/b..main/id-provider-name\\\"},{\\\"id\\\":\\\"OdmdBuildUserAuth/b..main/id-provider-clientId\\\"},{\\\"id\\\":\\\"OdmdBuildUserAuth/b..main/appsyncGraphqlUrl\\\"},{\\\"id\\\":\\\"OdmdBuildUserAuth/b..main/IdentityPoolId\\\"}],\\\"consumings\\\":[],\\\"stacks\\\":[\\\"OdmdBuildUserAuth--main\\\",\\\"OdmdBuildUserAuth--main-web-hosting\\\",\\\"OdmdBuildUserAuth--main-web-ui\\\"]}\"}],\"repo\":{\"owner\":\"ondemandenv\",\"name\":\"user-pool\",\"ghAppInstallID\":41561130}}"
+    },
+    {
+      "id": "networking",
+      "content": "{\"envers\":[],\"repo\":{\"owner\":\"ondemandenv\",\"name\":\"networking\",\"ghAppInstallID\":41561130}}"
+    },
+    {
+      "id": "eks-cluster-sbx",
+      "content": "{\"envers\":[],\"repo\":{\"owner\":\"ondemandenv\",\"name\":\"odmd-eks\",\"ghAppInstallID\":41561130}}"
+    },
+    {
+      "id": "OdmdBuildDefaultVpcRds",
+      "content": "{\"envers\":[],\"repo\":{\"owner\":\"ondemandenv\",\"name\":\"default-vpc-rds\",\"ghAppInstallID\":41561130}}"
+    },
+    {
+      "id": "DefaultKubeEks",
+      "content": "{\"envers\":[],\"repo\":{\"owner\":\"ondemandenv\",\"name\":\"default-ecr-eks\",\"ghAppInstallID\":41561130}}"
+    },
+    {
+      "id": "sampleSpringOpenAPI3img",
+      "content": "{\"envers\":[],\"repo\":{\"owner\":\"ondemandenv\",\"name\":\"spring-boot-swagger-3-example\",\"ghAppInstallID\":41561130}}"
+    },
+    {
+      "id": "sampleSpringOpenAPI3cdk",
+      "content": "{\"envers\":[],\"repo\":{\"owner\":\"ondemandenv\",\"name\":\"spring-boot-swagger-3-example\",\"ghAppInstallID\":41561130},\"workDirs\":[\"cdk\"]}"
+    },
+    {
+      "id": "coffee-shop-foundation",
+      "content": "{\"envers\":[],\"repo\":{\"owner\":\"ondemandenv\",\"name\":\"coffee-shop--foundation\",\"ghAppInstallID\":41561130}}"
+    },
+    {
+      "id": "coffeeShopOrderProcessor",
+      "content": "{\"envers\":[],\"repo\":{\"owner\":\"ondemandenv\",\"name\":\"coffee-shop--order-processor\",\"ghAppInstallID\":41561130}}"
+    },
+    {
+      "id": "coffeeShopOrderManager",
+      "content": "{\"envers\":[],\"repo\":{\"owner\":\"ondemandenv\",\"name\":\"coffee-shop--order-manager\",\"ghAppInstallID\":41561130}}"
+    }
+  ],
+  "https://voprcxtrgzchbbnomn2d7nfcmy.appsync-api.us-east-1.amazonaws.com/graphql",
+  "2025-04-21T02:32:27.636Z"
+]
