@@ -47,7 +47,15 @@ async function main() {
         webDomain: webHosting.webSubFQDN
     })
 
-    await webUi.buildWebUiAndDeploy()
+    try {
+        await webUi.buildWebUiAndDeploy()
+    } catch (e) {
+        if (process.env.ODMD_buildStackNames) {
+            throw e
+        } else {
+            console.error(e)
+        }
+    }
 }
 
 

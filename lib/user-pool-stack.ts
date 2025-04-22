@@ -148,7 +148,7 @@ export class UserPoolStack extends cdk.Stack {
         })
         postConfirmFun.addToRolePolicy(new PolicyStatement({
             actions: ['cognito-idp:AdminAddUserToGroup'],
-            resources: [userPool.userPoolArn]
+            resources: ['*']
         }));
 
         userPool.addTrigger(UserPoolOperation.POST_CONFIRMATION, postConfirmFun);
