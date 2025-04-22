@@ -8,7 +8,7 @@ import {
     UserPool,
     UserPoolClient,
     UserPoolClientIdentityProvider,
-    UserPoolIdentityProviderGoogle
+    UserPoolIdentityProviderGoogle, UserPoolOperation
 } from "aws-cdk-lib/aws-cognito";
 import {ARecord, HostedZone, RecordTarget} from "aws-cdk-lib/aws-route53";
 import {Certificate, CertificateValidation} from "aws-cdk-lib/aws-certificatemanager";
@@ -16,6 +16,7 @@ import {OdmdEnverUserAuthSbx, OndemandContractsSandbox} from "@ondemandenv/odmd-
 import {OdmdCrossRefProducer, OdmdEnverUserAuth, OdmdShareOut} from "@ondemandenv/contracts-lib-base";
 import {UserPoolDomainTarget} from "aws-cdk-lib/aws-route53-targets";
 import * as path from "node:path";
+import {PolicyStatement} from "aws-cdk-lib/aws-iam";
 
 export class UserPoolStack extends cdk.Stack {
 
@@ -115,12 +116,12 @@ export class UserPoolStack extends cdk.Stack {
             )
         });
 
-        new lambda.Function(this, 'post-confirmation', {
+        const postConfirmFun = new lambda.Function(this, 'post-confirmation', {
             runtime: lambda.Runtime.PROVIDED_AL2023,
             handler: 'bootstrap',
-            code: lambda.Code.fromAsset(path.join(__dirname, 'post-confirmation'),{
+            code: lambda.Code.fromAsset(path.join(__dirname, 'post-confirmation'), {
                 assetHashType: AssetHashType.OUTPUT,
-                bundling:{
+                bundling: {
                     image: lambda.Runtime.PROVIDED_AL2023.bundlingImage,
                     command: [
                         'bash',
@@ -145,7 +146,12 @@ export class UserPoolStack extends cdk.Stack {
             architecture: lambda.Architecture.X86_64
 
         })
+        postConfirmFun.addToRolePolicy(new PolicyStatement({
+            actions: ['cognito-idp:AdminAddUserToGroup'],
+            resources: [userPool.userPoolArn]
+        }));
 
+        userPool.addTrigger(UserPoolOperation.POST_CONFIRMATION, postConfirmFun);
 
         new OdmdShareOut(this, new Map<OdmdCrossRefProducer<OdmdEnverUserAuth>, any>([
             [myEnver.idProviderName, `cognito-idp.${Stack.of(this).region}.amazonaws.com/${userPool.userPoolId}`],
