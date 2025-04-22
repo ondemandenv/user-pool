@@ -164,7 +164,7 @@ async function main() {
         authContainer!.innerHTML = `
             <button class="login-button">
                 <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google">
-                Sign in with Google
+                Sign in with Google to connect to data/appsync service
             </button>
         `;
 

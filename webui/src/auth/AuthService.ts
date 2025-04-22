@@ -161,8 +161,13 @@ export class AuthService {
             );
 
             return this._credentials;
-        } catch (error) {
-            console.error('Failed to refresh credentials:', error);
+        } catch (error: any) {
+            if (error.name == 'NotAuthorizedException') {
+                alert('Not Authorized, contact gary.y.7811@gmail.com to connect to data/Appsync service');
+                this.logout()
+                return null
+            }
+            alert(`Authentication Error: ${error.message}\nYou will be logged out.`);
             this.logout();
             return null;
         }
