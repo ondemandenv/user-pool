@@ -1,18 +1,21 @@
 import * as cdk from 'aws-cdk-lib';
+import {AssetHashType, SecretValue, Stack} from 'aws-cdk-lib';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 import {Construct} from 'constructs';
 import {
-    OAuthScope, ProviderAttribute,
+    OAuthScope,
+    ProviderAttribute,
     UserPool,
     UserPoolClient,
     UserPoolClientIdentityProvider,
     UserPoolIdentityProviderGoogle
 } from "aws-cdk-lib/aws-cognito";
-import {SecretValue, Stack} from "aws-cdk-lib";
 import {ARecord, HostedZone, RecordTarget} from "aws-cdk-lib/aws-route53";
 import {Certificate, CertificateValidation} from "aws-cdk-lib/aws-certificatemanager";
 import {OdmdEnverUserAuthSbx, OndemandContractsSandbox} from "@ondemandenv/odmd-contracts-sandbox";
 import {OdmdCrossRefProducer, OdmdEnverUserAuth, OdmdShareOut} from "@ondemandenv/contracts-lib-base";
 import {UserPoolDomainTarget} from "aws-cdk-lib/aws-route53-targets";
+import * as path from "node:path";
 
 export class UserPoolStack extends cdk.Stack {
 
@@ -111,6 +114,37 @@ export class UserPoolStack extends cdk.Stack {
                 new UserPoolDomainTarget(domain)
             )
         });
+
+        new lambda.Function(this, 'post-confirmation', {
+            runtime: lambda.Runtime.PROVIDED_AL2023,
+            handler: 'bootstrap',
+            code: lambda.Code.fromAsset(path.join(__dirname, 'post-confirmation'),{
+                assetHashType: AssetHashType.OUTPUT,
+                bundling:{
+                    image: lambda.Runtime.PROVIDED_AL2023.bundlingImage,
+                    command: [
+                        'bash',
+                        '-c',
+                        [
+                            'cd /asset-input',
+                            'go env -w GOPROXY=https://proxy.golang.org,direct',
+                            'go mod download',
+                            'go mod tidy',
+                            'GOOS=linux GOARCH=amd64 go build -o /asset-output/bootstrap .'
+                        ].join(' && ')
+                    ],
+                    user: 'root'
+                }
+            }),
+            environment: {
+                USER_POOL_ID: userPool.userPoolId,
+                GROUP_NAME: 'odmd-appsync-user',
+            },
+            timeout: cdk.Duration.seconds(10),
+            memorySize: 128,
+            architecture: lambda.Architecture.X86_64
+
+        })
 
 
         new OdmdShareOut(this, new Map<OdmdCrossRefProducer<OdmdEnverUserAuth>, any>([
