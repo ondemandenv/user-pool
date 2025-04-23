@@ -210,7 +210,9 @@ async function main() {
     // Add event listeners for auth buttons
     document.addEventListener('click', async (e) => {
         const target = e.target as HTMLElement;
-        if (target.closest('.login-button')) {
+        const loginButton = target.closest('.login-button') as HTMLButtonElement | null;
+        if (loginButton) {
+            loginButton.disabled = true;
             auth.initiateGoogleLogin();
         } else if (target.closest('#logout-button')) {
             auth.logout();
