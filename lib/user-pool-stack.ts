@@ -17,6 +17,9 @@ import {OdmdCrossRefProducer, OdmdEnverUserAuth, OdmdShareOut} from "@ondemanden
 import {UserPoolDomainTarget} from "aws-cdk-lib/aws-route53-targets";
 import * as path from "node:path";
 import {PolicyStatement} from "aws-cdk-lib/aws-iam";
+import * as cr from 'aws-cdk-lib/custom-resources';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import {AwsSdkCall} from "aws-cdk-lib/custom-resources/lib/aws-custom-resource/aws-custom-resource";
 
 export class UserPoolStack extends cdk.Stack {
 
@@ -148,10 +151,55 @@ export class UserPoolStack extends cdk.Stack {
         })
         postConfirmFun.addToRolePolicy(new PolicyStatement({
             actions: ['cognito-idp:AdminAddUserToGroup'],
-            resources: ['*']
+            resources: [userPool.userPoolArn]
         }));
 
-        userPool.addTrigger(UserPoolOperation.POST_CONFIRMATION, postConfirmFun);
+        // Instead of direct trigger association:
+        // userPool.addTrigger(UserPoolOperation.POST_CONFIRMATION, postConfirmFun);
+
+        // Use a Custom Resource to associate the trigger after both resources are created
+        const triggerAssociationRole = new iam.Role(this, 'TriggerAssociationRole', {
+            assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+        });
+
+        triggerAssociationRole.addToPolicy(new iam.PolicyStatement({
+            actions: ['cognito-idp:UpdateUserPool'],
+            resources: [userPool.userPoolArn],
+        }));
+
+        // Create the custom resource to update the user pool with the trigger
+        const callApi = {
+            service: 'CognitoIdentityServiceProvider',
+            action: 'updateUserPool',
+            parameters: {
+                UserPoolId: userPool.userPoolId,
+                LambdaConfig: {
+                    PostConfirmation: postConfirmFun.functionArn
+                }
+            },
+            physicalResourceId: cr.PhysicalResourceId.of('UserPoolTriggerAssociation'),
+        } as AwsSdkCall;
+        const triggerAssociation = new cr.AwsCustomResource(this, 'AssociatePostConfirmationTrigger', {
+            onCreate: callApi,
+            onUpdate: callApi,
+            policy: cr.AwsCustomResourcePolicy.fromStatements([
+                new iam.PolicyStatement({
+                    actions: ['cognito-idp:UpdateUserPool'],
+                    resources: [userPool.userPoolArn],
+                }),
+            ]),
+            role: triggerAssociationRole,
+        });
+
+        new lambda.CfnPermission(this, 'CognitoInvokePermission', {
+            action: 'lambda:InvokeFunction',
+            functionName: postConfirmFun.functionName,
+            principal: 'cognito-idp.amazonaws.com',
+            sourceArn: userPool.userPoolArn,
+        });
+
+        triggerAssociation.node.addDependency(userPool);
+        triggerAssociation.node.addDependency(postConfirmFun);
 
         new OdmdShareOut(this, new Map<OdmdCrossRefProducer<OdmdEnverUserAuth>, any>([
             [myEnver.idProviderName, `cognito-idp.${Stack.of(this).region}.amazonaws.com/${userPool.userPoolId}`],
