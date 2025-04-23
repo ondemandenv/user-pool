@@ -56,8 +56,8 @@ export class UserPoolStack extends cdk.Stack {
         // Create user pool group
         const userGroup = new UserPoolGroup(this, 'AppSyncUserGroup', {
             userPool: userPool,
-            groupName: 'odmd-appsync-user',
-            description: 'Group for AppSync users'
+            groupName: 'odmd-central-user',
+            description: 'Group for ODMD users'
         });
 
         const callbackUrls = myEnver.callbackUrls.map(c => c.getSharedValue(this))
@@ -157,7 +157,7 @@ export class UserPoolStack extends cdk.Stack {
             architecture: lambda.Architecture.X86_64
 
         })
-        
+
         // Make sure the Lambda function depends on the user group to ensure proper creation order
         postConfirmFun.node.addDependency(userGroup);
 
