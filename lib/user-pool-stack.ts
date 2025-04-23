@@ -8,6 +8,7 @@ import {
     UserPool,
     UserPoolClient,
     UserPoolClientIdentityProvider,
+    UserPoolGroup,
     UserPoolIdentityProviderGoogle, UserPoolOperation
 } from "aws-cdk-lib/aws-cognito";
 import {ARecord, HostedZone, RecordTarget} from "aws-cdk-lib/aws-route53";
@@ -51,6 +52,13 @@ export class UserPoolStack extends cdk.Stack {
             }
         });
         const userPool = this.userPool
+
+        // Create user pool group
+        const userGroup = new UserPoolGroup(this, 'AppSyncUserGroup', {
+            userPool: userPool,
+            groupName: 'odmd-appsync-user',
+            description: 'Group for AppSync users'
+        });
 
         const callbackUrls = myEnver.callbackUrls.map(c => c.getSharedValue(this))
         callbackUrls.push('http://localhost:5173/index.html?callback')
@@ -142,13 +150,17 @@ export class UserPoolStack extends cdk.Stack {
             }),
             environment: {
                 USER_POOL_ID: userPool.userPoolId,
-                GROUP_NAME: 'odmd-appsync-user',
+                GROUP_NAME: userGroup.groupName,
             },
             timeout: cdk.Duration.seconds(10),
             memorySize: 128,
             architecture: lambda.Architecture.X86_64
 
         })
+        
+        // Make sure the Lambda function depends on the user group to ensure proper creation order
+        postConfirmFun.node.addDependency(userGroup);
+
         postConfirmFun.addToRolePolicy(new PolicyStatement({
             actions: ['cognito-idp:AdminAddUserToGroup'],
             resources: [userPool.userPoolArn]
