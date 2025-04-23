@@ -37,13 +37,9 @@ function buildSelectionPanel(allBuildIds: string[]) {
     // Create build selection panel
     const buildPanel = document.createElement('div');
     buildPanel.id = 'build-panel';
-    buildPanel.style.position = 'fixed';
-    buildPanel.style.top = '20px';
-    buildPanel.style.left = '20px';
     buildPanel.style.backgroundColor = 'white';
     buildPanel.style.borderRadius = '4px';
     buildPanel.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-    buildPanel.style.zIndex = '1001';
     buildPanel.style.transition = 'all 0.3s ease';
     buildPanel.style.padding = '8px';
     buildPanel.style.cursor = 'pointer';
@@ -98,14 +94,14 @@ function buildSelectionPanel(allBuildIds: string[]) {
     buildPanel.appendChild(content);
 
     buildPanel.addEventListener('mouseenter', () => {
-        content.style.maxHeight = '5000px';
+        content.style.maxHeight = '5000px'; // Consider a more reasonable max-height?
     });
 
     buildPanel.addEventListener('mouseleave', () => {
         content.style.maxHeight = '0';
     });
 
-    document.querySelector('#app')?.appendChild(buildPanel);
+    return buildPanel; // Return the created element
 }
 
 async function main() {
@@ -134,8 +130,48 @@ async function main() {
         <div id="auth-container"></div>
     `;
 
+    // Create a container for controls (region dropdown + build panel)
+    const controlsContainer = document.createElement('div');
+    controlsContainer.id = 'controls-container';
+    controlsContainer.style.position = 'fixed';
+    controlsContainer.style.top = '20px';
+    controlsContainer.style.left = '20px';
+    controlsContainer.style.zIndex = '1001';
+    controlsContainer.style.display = 'flex';
+    controlsContainer.style.alignItems = 'flex-start'; // Align items to the top
+    controlsContainer.style.gap = '10px'; // Space between dropdown and build panel
+
+    // Create region dropdown
+    const regionSelect = document.createElement('select');
+    regionSelect.id = 'region-select';
+    regionSelect.style.padding = '4px 8px'; // Slightly adjust padding for standalone look
+    regionSelect.style.marginTop = '8px'; // Align roughly with build panel padding
+    regionSelect.style.borderRadius = '4px';
+    regionSelect.style.border = '1px solid #ccc'; // Add border for clarity
+
+    supportedRegions.forEach(r => {
+        const option = document.createElement('option');
+        option.value = r;
+        option.textContent = r;
+        if (r === region) {
+            option.selected = true;
+        }
+        regionSelect.appendChild(option);
+    });
+
+    regionSelect.addEventListener('change', (event) => {
+        const selectedRegion = (event.target as HTMLSelectElement).value;
+        window.location.search = `?region=${selectedRegion}`;
+    });
+
+    controlsContainer.appendChild(regionSelect); // Add dropdown to the controls container
+
     const allBuildEntities = config.gqlConfig.visData
-    buildSelectionPanel(allBuildEntities.map(i => i.id));
+    const buildPanel = buildSelectionPanel(allBuildEntities.map(i => i.id));
+    controlsContainer.appendChild(buildPanel);
+    controlsContainer.appendChild(regionSelect);
+
+    document.querySelector('#app')?.appendChild(controlsContainer);
 
     // Handle authentication UI
     const userInfo = localStorage.getItem('user_info');
