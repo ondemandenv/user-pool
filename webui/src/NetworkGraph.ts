@@ -15,6 +15,7 @@ export class NetworkGraph {
     readonly visNodes: DataSet<any>;
     readonly visEdges: DataSet<any>;
     readonly odmdNodes: Map<string, OdmdNode<any>>;
+    readonly odmdEdges: Map<string, OdmdEdge>;
     private repoToBuild: Map<string, BuildNode[]> | undefined
     private buildNodes: BuildNode[] = []
 
@@ -23,6 +24,7 @@ export class NetworkGraph {
         this.visNodes = new DataSet<any>();
         this.visEdges = new DataSet<any>();
         this.odmdNodes = new Map<string, OdmdNode<any>>();
+        this.odmdEdges = new Map<string, OdmdEdge>();
 
         const options = {
             edges: {
@@ -40,6 +42,7 @@ export class NetworkGraph {
         );
 
         let activeNode: OdmdNode<any> | null = null;
+        let activeEdge: OdmdEdge | null = null;
 
         this.network.on('hoverNode', (params) => {
             const node = this.getNodeById(params.node);
@@ -65,6 +68,29 @@ export class NetworkGraph {
             }
         });
 
+        this.network.on('hoverEdge', (params) => {
+            const edge = this.getEdgeById(params.edge);
+            if (edge) {
+                const pointer = params.pointer;
+                const canvas = this.container.getElementsByTagName('canvas')[0];
+                const boundingRect = canvas.getBoundingClientRect();
+
+                const x = boundingRect.left + pointer.DOM.x;
+                const y = boundingRect.top + pointer.DOM.y;
+
+                edge.showTooltip(x, y);
+                activeEdge = edge;
+            }
+        });
+
+        this.network.on('blurEdge', () => {
+            if (activeEdge) {
+                setTimeout(() => {
+                    activeEdge?.hideTooltip();
+                    activeEdge = null;
+                }, 100);
+            }
+        });
 
         // Add double click event listener here, after network is set
         this.network.on('doubleClick', (event) => {
@@ -87,6 +113,10 @@ export class NetworkGraph {
         return this.odmdNodes.get(id) || null;
     }
 
+    private getEdgeById(id: string): OdmdEdge | null {
+        return this.odmdEdges.get(id) || null;
+    }
+
     public addNode(node: OdmdNode<any>) {
         if (!this.visNodes.get(node.entity.id)) {
             this.visNodes.add(node.getNodeData());
@@ -97,11 +127,11 @@ export class NetworkGraph {
     public addEdge(edge: OdmdEdge) {
         if (!this.visEdges.get(edge.id)) {
             let edgeData = edge.getEdgeData();
-
-            const tmp = this.visEdges.add(edgeData);
+            this.visEdges.add(edgeData);
+            this.odmdEdges.set(edge.id, edge);
             return edge;
         }
-        return null
+        return null;
     }
 
     public cleanup() {
@@ -109,8 +139,8 @@ export class NetworkGraph {
         this.visNodes.clear();
         this.visEdges.clear();
         this.odmdNodes.clear();
+        this.odmdEdges.clear();
     }
-
 
     public async renderBuilds(buildEntities: Entity[]) {
         const newBuildIds = buildEntities.map(entity => entity.id);
@@ -189,7 +219,11 @@ export class NetworkGraph {
         this.odmdNodes.get(entityId)!.cleanup()
 
         const removedEdges = this.visEdges.get({filter: (e) => e.from == entityId || e.to == entityId})
-            .map(e => this.visEdges.remove(e))
+        for (const edge of removedEdges) {
+            this.odmdEdges.delete(edge.id);
+            this.visEdges.remove(edge);
+        }
+        
         const removedNodes = this.visNodes.remove(entityId)
         this.odmdNodes.delete(entityId)
         for( let i = 0; i < this.buildNodes.length; i++ ) {
@@ -217,8 +251,5 @@ export class NetworkGraph {
         } catch (e) {
             console.log(e)
         }
-
     }
-
-
 }

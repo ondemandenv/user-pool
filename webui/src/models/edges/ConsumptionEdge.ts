@@ -1,6 +1,7 @@
 import {OdmdEdge} from '../OdmdEdge.ts';
 import {EdgeOptions} from 'vis-network';
 import {NetworkGraph} from "../../NetworkGraph.ts";
+import {TooltipOptions} from "../Tooltip.ts";
 
 export class ConsumptionEdge extends OdmdEdge {
     private _productVersion: number = -1;
@@ -23,16 +24,13 @@ export class ConsumptionEdge extends OdmdEdge {
         this.update()
     }
 
-    readonly graph: NetworkGraph
-
-    constructor( graph:NetworkGraph, from: string, to: string) {
-        super(from, to, `consumes`);
-        this.graph = graph;
+    constructor(graph: NetworkGraph, from: string, to: string) {
+        super(graph, from, to, `consumes`);
     }
 
     update() {
         this.label = `Consuming ${this.consumingVersion}`;
-        this.graph.visEdges.update( this.getEdgeData())
+        this.graph.visEdges.update(this.getEdgeData());
     }
 
     getVisualOptions(): EdgeOptions {
@@ -48,6 +46,33 @@ export class ConsumptionEdge extends OdmdEdge {
                 background: 'white',
                 color: isOutdated ? '#ff9900' : '#aa0000',
             },
+        };
+    }
+
+    override getTooltipOptions(): TooltipOptions {
+        const isOutdated = this._consumingVersion < this._productVersion;
+        const statusText = isOutdated 
+            ? `<span style="color: #ff9900; font-weight: bold">⚠️ Outdated</span>` 
+            : `<span style="color: #006600; font-weight: bold">✓ Up to date</span>`;
+        
+        return {
+            content: `<div style="padding: 5px">
+                <strong>Consumption Relationship</strong><br>
+                <hr style="margin: 5px 0">
+                Consumer: <strong>${this.from}</strong><br>
+                Product: <strong>${this.to}</strong><br>
+                <hr style="margin: 5px 0">
+                Product Version: <strong>${this._productVersion}</strong><br>
+                Consuming Version: <strong>${this._consumingVersion}</strong><br>
+                Status: ${statusText}
+            </div>`,
+            showDelay: 300,
+            hideDelay: 500,
+            style: {
+                minWidth: '200px',
+                border: `2px solid ${isOutdated ? '#ff9900' : '#aa0000'}`,
+                borderRadius: '6px'
+            }
         };
     }
 }

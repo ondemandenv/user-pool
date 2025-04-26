@@ -1,4 +1,4 @@
-import {OdmdNode} from './OdmdNode';
+import {TooltipWindow} from './TooltipWindow';
 
 export interface TooltipOptions {
     content: string;
@@ -49,7 +49,7 @@ export class Tooltip {
                 border: '1px solid #ccc',
                 borderRadius: '4px',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                zIndex: OdmdNode.getNextZIndex(),
+                zIndex: TooltipWindow.getNextZIndex(),
                 cursor: 'pointer',
                 ...options.style,
             });

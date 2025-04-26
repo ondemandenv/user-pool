@@ -1,5 +1,5 @@
 import { MenuOptions } from "./OdmdNode";
-import { OdmdNode } from "./OdmdNode";
+import { TooltipWindow } from "./TooltipWindow";
 
 export class OdmdMenu {
     private menuElement: HTMLElement | null = null;
@@ -23,7 +23,7 @@ export class OdmdMenu {
             border: '1px solid #ccc',
             borderRadius: '4px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-            zIndex: OdmdNode.getNextZIndex() + 100,
+            zIndex: TooltipWindow.getNextZIndex() + 100,
             minWidth: '150px',
             ...this.options.style,
         });

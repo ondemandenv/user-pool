@@ -57,7 +57,7 @@ export class BuildNode extends OdmdNode<BuildWindow> {
             }
             this.entityIdToEnverNode.set(ce.id, en)
             this.addChildNode(en);
-            this.addEdge(new BuildToEnverEdge(this.entity.id, en.entity.id));
+            this.addEdge(new BuildToEnverEdge(this.graph, this.entity.id, en.entity.id));
         })
     }
 
@@ -187,7 +187,7 @@ export class BuildNode extends OdmdNode<BuildWindow> {
 
                     this.entityIdToEnverNode.set(ce.id, en)
                     this.addChildNode(en);
-                    this.addEdge(new BuildToEnverEdge(this.entity.id, en.entity.id));
+                    this.addEdge(new BuildToEnverEdge(this.graph, this.entity.id, en.entity.id));
                 }
             })
         }

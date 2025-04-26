@@ -52,7 +52,7 @@ export class EnverNode extends OdmdNode<EnverWindow> {
 
         this.productNodes.forEach(pn => {
             this.addChildNode(pn);
-            const productionEdge = new ProductionEdge(this.entity.id, pn.entity.id);
+            const productionEdge = new ProductionEdge(this.graph, this.entity.id, pn.entity.id);
             this.addEdge(productionEdge);
             this.productEdges.push(productionEdge);
         })
@@ -216,9 +216,10 @@ ${wflStatusJstr ?? localStorage.getItem('user_info') ? 'Never ran ...' : 'Login 
                         if (kn != 'ContractsShareInNow') {
                             this.sharedToConsumedVer.set(`/odmd-share/${k}/${kn}`, obj[kn]);
 
-                            this.consumptionEdges.find(c => {
-                                c.consumingVersion = obj[kn]
-                            })
+                            const matchingEdge = this.consumptionEdges.find(c => c.to.includes(kn));
+                            if (matchingEdge) {
+                                matchingEdge.consumingVersion = obj[kn];
+                            }
                         }
                     }
 

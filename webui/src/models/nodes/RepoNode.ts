@@ -18,7 +18,7 @@ export class RepoNode extends OdmdNode<RepoWindow> {
         this.buildNodes = buildNodes;
         this.buildNodes.forEach(bn => {
             this.addChildNode(bn);
-            this.addEdge(new RepoToBuildEdge(this.entity.id, bn.entity.id));
+            this.addEdge(new RepoToBuildEdge(this.graph, this.entity.id, bn.entity.id));
         });
     }
 

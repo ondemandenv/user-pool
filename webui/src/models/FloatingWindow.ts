@@ -1,5 +1,6 @@
 import {OdmdNode} from "./OdmdNode";
 import {Parameter} from "@aws-sdk/client-ssm";
+import {TooltipWindow} from "./TooltipWindow";
 
 export interface FloatingWindowOptions {
     title: string;
@@ -86,7 +87,7 @@ export abstract class FloatingWindow<T extends OdmdNode<FloatingWindow<T>>> {
             border: '1px solid #ccc',
             borderRadius: '4px',
             boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-            zIndex: OdmdNode.getNextZIndex(),
+            zIndex: TooltipWindow.getNextZIndex(),
             minWidth: '200px',
             transition: 'all 0.3s ease',
             ...options.windowStyle,
@@ -248,7 +249,7 @@ export abstract class FloatingWindow<T extends OdmdNode<FloatingWindow<T>>> {
     show(x: number, y: number): void {
         this.element.style.left = `${x}px`;
         this.element.style.top = `${y}px`;
-        this.element.style.zIndex = String(OdmdNode.getNextZIndex());
+        this.element.style.zIndex = String(TooltipWindow.getNextZIndex());
         if (!document.body.contains(this.element)) {
             document.body.appendChild(this.element);
         }
@@ -266,7 +267,7 @@ export abstract class FloatingWindow<T extends OdmdNode<FloatingWindow<T>>> {
         this.handleSizeListener = this.handleResize.bind(this);
         window.addEventListener('resize', this.handleSizeListener);
         this.element.addEventListener('mousedown', () => {
-            this.element.style.zIndex = String(OdmdNode.getNextZIndex());
+            this.element.style.zIndex = String(TooltipWindow.getNextZIndex());
         });
         this.setupDragging();
     }

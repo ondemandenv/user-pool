@@ -1,9 +1,10 @@
 import { OdmdEdge } from '../OdmdEdge.ts';
 import { EdgeOptions } from 'vis-network';
+import { NetworkGraph } from '../../NetworkGraph.ts';
 
 export class BuildToEnverEdge extends OdmdEdge {
-  constructor(from: string, to: string) {
-    super(from, to, 'owns');
+  constructor(graph: NetworkGraph, from: string, to: string) {
+    super(graph, from, to, 'owns');
   }
 
   getVisualOptions(): EdgeOptions {

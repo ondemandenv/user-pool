@@ -5,10 +5,11 @@ import {Entity} from "../gql/types";
 import {OnEntityChangedById} from "../gql/ops";
 import {NetworkGraph} from "../NetworkGraph";
 import {FloatingWindow} from "./FloatingWindow";
-import {Tooltip, TooltipOptions} from "./Tooltip";
+import {TooltipOptions} from "./Tooltip";
 import {OdmdMenu} from "./OdmdMenu.ts";
 import {AuthService} from "../auth/AuthService.ts";
 import {Parameter} from "@aws-sdk/client-ssm";
+import {TooltipWindow} from "./TooltipWindow";
 
 export interface MenuItem {
     icon?: string;
@@ -21,24 +22,21 @@ export interface MenuOptions {
     style?: Partial<CSSStyleDeclaration>;
 }
 
-export abstract class OdmdNode<T extends FloatingWindow<OdmdNode<T>>> {
+export abstract class OdmdNode<T extends FloatingWindow<OdmdNode<T>>> extends TooltipWindow {
     entity: Entity;
-    private tooltip: Tooltip | null = null;
     protected floatingWindow: T | null = null;
     readonly graph: NetworkGraph;
     private menu: OdmdMenu | null = null;
-    private static topZIndex: number = 1000;
     private _physicsEnabled = false;
 
     constructor(entity: Entity, networkManager: NetworkGraph) {
+        super();
         this.entity = entity;
         this.graph = networkManager;
     }
     readonly parameters = new Map<string, Parameter>();
 
     abstract getVisualOptions(): NodeOptions;
-
-    abstract getTooltipOptions(): TooltipOptions;
 
     abstract getMenuOptions(): MenuOptions;
 
@@ -71,41 +69,9 @@ export abstract class OdmdNode<T extends FloatingWindow<OdmdNode<T>>> {
         }
     }
 
-    showTooltip(x: number, y: number) {
-        if (!this.tooltip) {
-            this.tooltip = new Tooltip(
-                (e) => this.handleTooltipClick(e),
-                (e) => this.handleTooltipMouseEnter(e),
-                (e) => this.handleTooltipMouseLeave(e)
-            );
-        }
-        this.tooltip.show(x, y, this.getTooltipOptions());
-    }
-
-    private handleTooltipClick(e: MouseEvent) {
-        e.stopPropagation();
-        const rect = this.tooltip!.getElement()?.getBoundingClientRect();
-        if (!rect) return;
-        this.hideTooltip();
-        this.showFloatingWindow(rect.left, rect.top);
-    }
-
-    private handleTooltipMouseEnter(e: MouseEvent) {
-        this.tooltip?.getElement()?.classList.add('active');
-    }
-
-    private handleTooltipMouseLeave(e: MouseEvent) {
-        const element = this.tooltip?.getElement();
-        if (element && !element.classList.contains('transforming')) {
-            element.classList.remove('active');
-            this.hideTooltip();
-        }
-    }
-
-    hideTooltip() {
-        if (this.tooltip) {
-            this.tooltip.hide();
-        }
+    // Override onTooltipClick from TooltipWindow base class
+    protected onTooltipClick(x: number, y: number): void {
+        this.showFloatingWindow(x, y);
     }
 
     showFloatingWindow(x: number, y: number) {
@@ -182,8 +148,7 @@ export abstract class OdmdNode<T extends FloatingWindow<OdmdNode<T>>> {
             return
         }
         console.log(this + `: subscribing-> ${this.entity.id}`);
-        let inst = WbskGraphQLClient.inst;
-        this.unsubscribe = await inst.subscribe({
+        this.unsubscribe = await WbskGraphQLClient.inst.subscribe({
             query: OnEntityChangedById,
             variables: {id: this.entity.id},
         }, {
@@ -215,9 +180,5 @@ export abstract class OdmdNode<T extends FloatingWindow<OdmdNode<T>>> {
         this.graph.network.updateClusteredNode(this.entity.id, {
             physics: this._physicsEnabled
         });
-    }
-
-    static getNextZIndex(): number {
-        return ++OdmdNode.topZIndex;
     }
 }
