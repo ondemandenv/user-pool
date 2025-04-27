@@ -8,6 +8,7 @@ import {RepoNode} from "./models/nodes/RepoNode.ts";
 import {WbskGraphQLClient} from "./gql/WbskGraphQLClient.ts";
 import {ParamService} from "./ssm/ParamService.ts";
 import {ProductNode} from "./models/nodes/ProductNode.ts";
+import {TooltipWindow} from "./models/TooltipWindow.ts";
 
 export class NetworkGraph {
     private container: HTMLElement;
@@ -21,6 +22,13 @@ export class NetworkGraph {
 
     constructor(containerId: string) {
         this.container = document.getElementById(containerId)!;
+        
+        // Make the container and all its child elements non-selectable
+        this.container.style.userSelect = 'none';
+        (this.container.style as any)['-webkit-user-select'] = 'none';
+        (this.container.style as any)['-ms-user-select'] = 'none';
+        (this.container.style as any)['-moz-user-select'] = 'none';
+        
         this.visNodes = new DataSet<any>();
         this.visEdges = new DataSet<any>();
         this.odmdNodes = new Map<string, OdmdNode<any>>();
@@ -40,6 +48,15 @@ export class NetworkGraph {
             {nodes: this.visNodes, edges: this.visEdges},
             options
         );
+        
+        // Apply non-selectable styling to network canvas
+        const canvasElement = this.container.querySelector('canvas');
+        if (canvasElement) {
+            (canvasElement as HTMLCanvasElement).style.userSelect = 'none';
+            ((canvasElement as HTMLCanvasElement).style as any)['-webkit-user-select'] = 'none';
+            ((canvasElement as HTMLCanvasElement).style as any)['-ms-user-select'] = 'none';
+            ((canvasElement as HTMLCanvasElement).style as any)['-moz-user-select'] = 'none';
+        }
 
         let activeNode: OdmdNode<any> | null = null;
         let activeEdge: OdmdEdge | null = null;
@@ -60,12 +77,10 @@ export class NetworkGraph {
         });
 
         this.network.on('blurNode', () => {
-            if (activeNode) {
-                setTimeout(() => {
-                    activeNode?.hideTooltip();
-                    activeNode = null;
-                }, 100);
-            }
+            setTimeout(() => {
+                TooltipWindow.hideAllTooltips();
+                activeNode = null;
+            }, 100);
         });
 
         this.network.on('hoverEdge', (params) => {
@@ -84,12 +99,10 @@ export class NetworkGraph {
         });
 
         this.network.on('blurEdge', () => {
-            if (activeEdge) {
-                setTimeout(() => {
-                    activeEdge?.hideTooltip();
-                    activeEdge = null;
-                }, 100);
-            }
+            setTimeout(() => {
+                TooltipWindow.hideAllTooltips();
+                activeEdge = null;
+            }, 100);
         });
 
         // Add double click event listener here, after network is set

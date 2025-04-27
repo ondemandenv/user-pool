@@ -25,6 +25,10 @@ export class OdmdMenu {
             boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
             zIndex: TooltipWindow.getNextZIndex() + 100,
             minWidth: '150px',
+            userSelect: 'none',
+            MozUserSelect: 'none',
+            WebkitUserSelect: 'none',
+            msUserSelect: 'none',
             ...this.options.style,
         });
 
@@ -35,7 +39,11 @@ export class OdmdMenu {
                 gap: 8px;
                 padding: 8px 16px;
                 cursor: pointer;
-                transition: background-color 0.2s;">
+                transition: background-color 0.2s;
+                user-select: none;
+                -moz-user-select: none;
+                -webkit-user-select: none;
+                -ms-user-select: none;">
                 ${item.icon ? `<span class="material-icons" style="font-size: 18px;">${item.icon}</span>` : ''}
                 <span>${item.label}</span>
             </div>
@@ -54,6 +62,13 @@ export class OdmdMenu {
                 this.options.items[index].action();
                 this.hide();
             });
+        });
+
+        // Add mouseleave handler to hide all tooltips when mouse leaves the menu
+        this.menuElement.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                TooltipWindow.hideAllTooltips();
+            }, 100);
         });
 
         document.addEventListener('click', this.handleDocumentClick);

@@ -51,10 +51,14 @@ export class Tooltip {
                 boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
                 zIndex: TooltipWindow.getNextZIndex(),
                 cursor: 'pointer',
+                userSelect: 'none',
+                MozUserSelect: 'none',
+                WebkitUserSelect: 'none',
+                msUserSelect: 'none',
                 ...options.style,
             });
 
-            // Add non-selectable and click-through styles to content
+            // Make all content non-selectable
             const contentElement = this.element.querySelector('.tooltip-content') as HTMLElement;
             if (contentElement) {
                 Object.assign(contentElement.style, {

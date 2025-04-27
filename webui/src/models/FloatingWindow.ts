@@ -56,7 +56,13 @@ export abstract class FloatingWindow<T extends OdmdNode<FloatingWindow<T>>> {
 
         this.contentElement = document.createElement('div');
         this.contentElement.className = 'window-content';
-        Object.assign(this.contentElement.style, options.contentStyle || {});
+        Object.assign(this.contentElement.style, {
+            userSelect: 'none',
+            MozUserSelect: 'none',
+            WebkitUserSelect: 'none',
+            msUserSelect: 'none',
+            ...options.contentStyle || {}
+        });
 
         if (options.contentHTML) {
             this.contentElement.innerHTML = options.contentHTML;
@@ -90,6 +96,10 @@ export abstract class FloatingWindow<T extends OdmdNode<FloatingWindow<T>>> {
             zIndex: TooltipWindow.getNextZIndex(),
             minWidth: '200px',
             transition: 'all 0.3s ease',
+            userSelect: 'none',
+            MozUserSelect: 'none',
+            WebkitUserSelect: 'none',
+            msUserSelect: 'none',
             ...options.windowStyle,
         });
         return element;
@@ -111,6 +121,10 @@ export abstract class FloatingWindow<T extends OdmdNode<FloatingWindow<T>>> {
             paddingBottom: '8px',
             borderBottom: '1px solid #eee',
             cursor: 'move',
+            userSelect: 'none',
+            MozUserSelect: 'none',
+            WebkitUserSelect: 'none',
+            msUserSelect: 'none',
             ...options.headerStyle,
         });
 
@@ -150,6 +164,10 @@ export abstract class FloatingWindow<T extends OdmdNode<FloatingWindow<T>>> {
             alignItems: 'center',
             flex: '1',
             minWidth: '0',
+            userSelect: 'none',
+            MozUserSelect: 'none',
+            WebkitUserSelect: 'none',
+            msUserSelect: 'none',
         });
 
         let focusButton: HTMLButtonElement | undefined;
@@ -185,6 +203,10 @@ export abstract class FloatingWindow<T extends OdmdNode<FloatingWindow<T>>> {
             minWidth: '0',
             fontSize: '14px',
             fontWeight: '500',
+            userSelect: 'none',
+            MozUserSelect: 'none',
+            WebkitUserSelect: 'none',
+            msUserSelect: 'none',
         });
         title.textContent = options.title;
         return title;
@@ -269,6 +291,14 @@ export abstract class FloatingWindow<T extends OdmdNode<FloatingWindow<T>>> {
         this.element.addEventListener('mousedown', () => {
             this.element.style.zIndex = String(TooltipWindow.getNextZIndex());
         });
+        
+        // Add mouseleave handler to hide all tooltips when mouse leaves the window
+        this.element.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                TooltipWindow.hideAllTooltips();
+            }, 100);
+        });
+        
         this.setupDragging();
     }
 
