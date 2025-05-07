@@ -2,7 +2,6 @@ import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as cdk from 'aws-cdk-lib';
 import {Construct} from 'constructs';
 import {Bucket} from "aws-cdk-lib/aws-s3";
-import {OdmdEnverUserAuthSbx, OndemandContractsSandbox} from "@ondemandenv/odmd-contracts-sandbox";
 import {AssumeRoleCommand, STSClient} from "@aws-sdk/client-sts";
 import {GetParametersCommand, SSMClient} from "@aws-sdk/client-ssm";
 import {UserPool} from "aws-cdk-lib/aws-cognito";
@@ -10,6 +9,7 @@ import {AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId} from "aw
 import {GetObjectCommand, S3Client} from "@aws-sdk/client-s3";
 import {Readable} from "node:stream";
 import {Credentials} from "@aws-sdk/client-sts/dist-types/models/models_0";
+import {OdmdEnverUserAuth} from "@ondemandenv/contracts-lib-base";
 
 export class WebUiStack extends cdk.Stack {
 
@@ -17,20 +17,20 @@ export class WebUiStack extends cdk.Stack {
     readonly userPool: UserPool;
     readonly webDomain: string;
     readonly userPoolDomain: string;
+    readonly authEnver: OdmdEnverUserAuth;
 
     constructor(scope: Construct, id: string, props: cdk.StackProps & {
-        bucket: Bucket, userPool: UserPool, userPoolDomain: string, webDomain: string
+        bucket: Bucket, userPool: UserPool, userPoolDomain: string, webDomain: string, authEnver: OdmdEnverUserAuth
     }) {
         super(scope, id, props);
         this.targetBucket = props.bucket;
         this.userPool = props.userPool;
         this.userPoolDomain = props.userPoolDomain;
         this.webDomain = props.webDomain;
+        this.authEnver = props.authEnver;
     }
 
     async buildWebUiAndDeploy() {
-
-        const myEnver = OndemandContractsSandbox.inst.getTargetEnver() as OdmdEnverUserAuthSbx
 
         const webDeployment = new s3deploy.BucketDeployment(this, 'DeployWebsite', {
             sources: [s3deploy.Source.asset('webui/dist')],
@@ -38,18 +38,19 @@ export class WebUiStack extends cdk.Stack {
         });
 
         const assumeRoleResponse = await new STSClient({region: this.region}).send(new AssumeRoleCommand({
-            RoleArn: myEnver.centralRoleArn,
+            RoleArn: this.authEnver.centralRoleArn,
             RoleSessionName: 'getValsFromCentral'
         }));
         const credentials = assumeRoleResponse.Credentials!;
         const now = new Date().toISOString();
 
-        const csDeployRslt = await Promise.allSettled([myEnver.targetAWSRegion, 'us-west-1']
+        const csDeployRslt = await Promise.allSettled([this.authEnver.targetAWSRegion, 'us-west-1']
             .map(async region => {
 
+                try {
                 const visDataGqlUrl = await this.getVisDataAndGqUrl(credentials, region,
-                    myEnver.appsyncGraphqlUrl.toSharePath(),
-                    `/odmd-share/${myEnver.owner.buildId}/${myEnver.targetRevision.toPathPartStr()}/centralBucketName`);
+                        this.authEnver.appsyncGraphqlUrl.toSharePath(),
+                        `/odmd-share/${this.authEnver.owner.buildId}/${this.authEnver.targetRevision.toPathPartStr()}/centralBucketName`);
                 visDataGqlUrl.push(now)
 
                 const regionConfig = {
@@ -76,11 +77,12 @@ export class WebUiStack extends cdk.Stack {
                         resources: [this.targetBucket.arnForObjects('*')]
                     })
                 }).node.addDependency(webDeployment)
-            })
-        )
-        if (!csDeployRslt.find(d => d.status == 'fulfilled')) {
-            throw new Error(`ALL failed, NO REGION's appsync deployed at all? `)
+                } catch (e) {
+                    console.error(`>>>!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!region: ${region} NOT READY !!!!!!!!!!!!!!!!!!!!!` + e)
+                    console.error(e)
+                    console.error(`<<<!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!region: ${region} NOT READY !!!!!!!!!!!!!!!!!!!!!` + e)
         }
+            }))
         const rejected = csDeployRslt.find(d => d.status == 'rejected');
         if (rejected) {
             console.log(rejected.reason)
@@ -98,9 +100,9 @@ export class WebUiStack extends cdk.Stack {
 
         const authParams = await ssmClient.send(new GetParametersCommand({
             Names: [
-                myEnver.idProviderClientId.toSharePath(),
-                myEnver.idProviderName.toSharePath(),
-                myEnver.identityPoolId.toSharePath(),
+                this.authEnver.idProviderClientId.toSharePath(),
+                this.authEnver.idProviderName.toSharePath(),
+                this.authEnver.identityPoolId.toSharePath(),
                 //D:\odmd\seed\ONDEMAND_CENTRAL_REPO\src\lib\appsync\AppsyncBackendStack.ts
                 // bucketNameParamPath
             ],

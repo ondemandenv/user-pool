@@ -9,27 +9,26 @@
     "watch": "tsc -w",
     "test": "jest",
     "debug": "ts-node debug.ts",
-    "cdk-ls": "cross-env ODMD_build_id=OdmdBuildUserAuth ODMD_rev_ref=b..main cdk ls --profile sandbox-workspace1",
-    "cdk-sa": "cross-env ODMD_build_id=OdmdBuildUserAuth ODMD_rev_ref=b..main cdk synth * --profile sandbox-workspace1",
-    "cdk-sac": "cross-env ODMD_build_id=OdmdBuildUserAuth ODMD_rev_ref=b..main cdk deploy OdmdBuildUserAuth--main --exclusively --method prepare-change-set --require-approval never --profile sandbox-workspace1"
+    "cdk-ls": "tsc && cross-env ODMD_build_id=OdmdBuildUserAuth ODMD_rev_ref=b..odmd-sbx cdk ls --profile sandbox-workspace1",
+    "cdk-sa": "tsc && cross-env ODMD_build_id=OdmdBuildUserAuth ODMD_rev_ref=b..odmd-sbx cdk synth * --profile sandbox-workspace1",
+    "cdk-sac": "tsc && cross-env ODMD_build_id=OdmdBuildUserAuth ODMD_rev_ref=b..odmd-sbx cdk deploy OdmdBuildUserAuth--main --exclusively --method prepare-change-set --require-approval never --profile sandbox-workspace1"
   },
   "devDependencies": {
-    "@ondemandenv/odmd-contracts-sandbox": "0.0.85",
-    "@aws-sdk/client-sts": "^3.750.0",
-    "@aws-sdk/client-ssm": "^3.750.0",
-    "@aws-sdk/client-s3": "^3.750.0",
-    "@aws-sdk/credential-providers": "^3.750.0",
+    "@ondemandenv/odmd-contracts-sandbox": "0.0.89",
+    "@aws-sdk/client-sts": "^3.804.0",
+    "@aws-sdk/client-ssm": "^3.804.0",
+    "@aws-sdk/client-s3": "^3.804.0",
+    "@aws-sdk/credential-providers": "^3.804.0",
     "@types/jest": "^29.5.14",
     "@types/node": "22.14.1",
     "cross-env": "^7.0.3",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",
-    "aws-cdk": "2.178.2",
     "ts-node": "^10.9.2",
     "typescript": "~5.8.3"
   },
   "dependencies": {
-    "aws-cdk-lib": "2.178.2",
+    "aws-cdk-lib": "2.192.0",
     "constructs": "^10.0.0"
   }
 }

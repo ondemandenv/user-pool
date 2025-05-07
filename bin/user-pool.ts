@@ -3,7 +3,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import {StackProps} from "aws-cdk-lib";
 import {OndemandContractsSandbox} from "@ondemandenv/odmd-contracts-sandbox";
-import {OdmdEnverCdk} from "@ondemandenv/contracts-lib-base";
+import {OdmdEnverUserAuth} from "@ondemandenv/contracts-lib-base";
 import {UserPoolStack} from "../lib/user-pool-stack";
 import {WebHostingStack} from "../lib/web-hosting-stack";
 import {WebUiStack} from "../lib/web-ui-stack";
@@ -28,33 +28,31 @@ async function main() {
 
     new OndemandContractsSandbox(app)
 
-    const targetEnver = OndemandContractsSandbox.inst.getTargetEnver() as OdmdEnverCdk
-
-    const hostedZoneId = 'Z07732022HSGPH3GRGCVY';
-    const zoneName = 'auth.ondemandenv.link'
+    const targetEnver = OndemandContractsSandbox.inst.getTargetEnver() as OdmdEnverUserAuth
 
     const webHosting = new WebHostingStack(app, targetEnver.getRevStackNames()[1], {
-        ...props, hostedZoneId, zoneName
+        ...props, hostedZoneId: targetEnver.hostedZoneId, zoneName: targetEnver.hostedZoneName
     })
 
     const usrPool = new UserPoolStack(app, targetEnver.getRevStackNames()[0], {
-        ...props, hostedZoneId, zoneName, webSubFQDN: webHosting.webSubFQDN
+        ...props,
+        hostedZoneId: targetEnver.hostedZoneId,
+        zoneName: targetEnver.hostedZoneName,
+        webSubFQDN: webHosting.webSubFQDN,
+        authEnver: targetEnver
     })
 
     const webUi = new WebUiStack(app, targetEnver.getRevStackNames()[2], {
         ...props, bucket: webHosting.bucket, userPool: usrPool.userPool,
         userPoolDomain: usrPool.zoneName,
-        webDomain: webHosting.webSubFQDN
+        webDomain: webHosting.webSubFQDN,
+        authEnver: targetEnver
     })
 
     try {
         await webUi.buildWebUiAndDeploy()
     } catch (e) {
-        if (process.env.ODMD_buildStackNames) {
-            throw e
-        } else {
-            console.error(e)
-        }
+        console.error(`appsync not deployed, and /odmd-share ... not ready ?` + e)
     }
 }
 

@@ -9,11 +9,10 @@ import {
     UserPoolClient,
     UserPoolClientIdentityProvider,
     UserPoolGroup,
-    UserPoolIdentityProviderGoogle, UserPoolOperation
+    UserPoolIdentityProviderGoogle
 } from "aws-cdk-lib/aws-cognito";
 import {ARecord, HostedZone, RecordTarget} from "aws-cdk-lib/aws-route53";
 import {Certificate, CertificateValidation} from "aws-cdk-lib/aws-certificatemanager";
-import {OdmdEnverUserAuthSbx, OndemandContractsSandbox} from "@ondemandenv/odmd-contracts-sandbox";
 import {OdmdCrossRefProducer, OdmdEnverUserAuth, OdmdShareOut} from "@ondemandenv/contracts-lib-base";
 import {UserPoolDomainTarget} from "aws-cdk-lib/aws-route53-targets";
 import * as path from "node:path";
@@ -30,16 +29,14 @@ export class UserPoolStack extends cdk.Stack {
     readonly userPool: UserPool
 
     constructor(scope: Construct, id: string, props: cdk.StackProps & {
-        hostedZoneId: string, zoneName: string, webSubFQDN: string
+        hostedZoneId: string, zoneName: string, webSubFQDN: string, authEnver: OdmdEnverUserAuth
     }) {
         super(scope, id, props);
         this.hostedZoneId = props.hostedZoneId;
         this.zoneName = props.zoneName;
 
-        const myEnver = OndemandContractsSandbox.inst.getTargetEnver() as OdmdEnverUserAuthSbx
-
         this.userPool = new UserPool(this, 'Pool', {
-            userPoolName: 'auth.ondemandenv.link',
+            userPoolName: this.zoneName,
             selfSignUpEnabled: true,
             signInAliases: {
                 email: true,
@@ -60,10 +57,10 @@ export class UserPoolStack extends cdk.Stack {
             description: 'Group for ODMD users'
         });
 
-        const callbackUrls = myEnver.callbackUrls.map(c => c.getSharedValue(this))
+        const callbackUrls = props.authEnver.callbackUrls.map(c => c.getSharedValue(this))
         callbackUrls.push('http://localhost:5173/index.html?callback')
         callbackUrls.push(`https://${props.webSubFQDN}/index.html?callback`)
-        const logoutUrls = myEnver.logoutUrls.map(c => c.getSharedValue(this))
+        const logoutUrls = props.authEnver.logoutUrls.map(c => c.getSharedValue(this))
         logoutUrls.push('http://localhost:5173/index.html?logout')
         logoutUrls.push(`https://${props.webSubFQDN}/index.html?logout`)
 
@@ -214,8 +211,8 @@ export class UserPoolStack extends cdk.Stack {
         triggerAssociation.node.addDependency(postConfirmFun);
 
         new OdmdShareOut(this, new Map<OdmdCrossRefProducer<OdmdEnverUserAuth>, any>([
-            [myEnver.idProviderName, `cognito-idp.${Stack.of(this).region}.amazonaws.com/${userPool.userPoolId}`],
-            [myEnver.idProviderClientId, oauthUserpoolClient.userPoolClientId]
+            [props.authEnver.idProviderName, `cognito-idp.${Stack.of(this).region}.amazonaws.com/${userPool.userPoolId}`],
+            [props.authEnver.idProviderClientId, oauthUserpoolClient.userPoolClientId]
         ]))
 
         new cdk.CfnOutput(this, 'UserPoolId', {value: userPool.userPoolId});
