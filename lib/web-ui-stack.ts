@@ -165,7 +165,9 @@ export class WebUiStack extends cdk.Stack {
         const regionParamOut = await ssmClient.send(
             new GetParametersCommand({
                 Names: [visDataBucketPath, appsyncGraphqlUrlPath]
-            }))
+            })
+        )
+        console.log(JSON.stringify(regionParamOut, null, 2))
 
         const s3Client = new S3Client({region, credentials})
         const visDataOut = await s3Client.send(new GetObjectCommand({

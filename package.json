@@ -14,7 +14,7 @@
     "cdk-sac": "tsc && cross-env ODMD_build_id=OdmdBuildUserAuth ODMD_rev_ref=b..odmd-sbx cdk deploy OdmdBuildUserAuth--main --exclusively --method prepare-change-set --require-approval never --profile sandbox-workspace1"
   },
   "devDependencies": {
-    "@ondemandenv/odmd-contracts-sandbox": "0.0.89",
+    "@ondemandenv/odmd-contracts-sandbox": "0.0.90",
     "@aws-sdk/client-sts": "^3.804.0",
     "@aws-sdk/client-ssm": "^3.804.0",
     "@aws-sdk/client-s3": "^3.804.0",

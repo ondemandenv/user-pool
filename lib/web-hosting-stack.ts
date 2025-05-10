@@ -39,7 +39,7 @@ export class WebHostingStack extends cdk.Stack {
 
             this.bucket.grantRead(new ServicePrincipal('cloudfront.amazonaws.com'));
 
-            const webSubdomain = 'auth'
+            const webSubdomain = 'web'
             this.webSubFQDN = webSubdomain + '.' + zoneName
 
             const origin = S3BucketOrigin.withOriginAccessControl(this.bucket);
