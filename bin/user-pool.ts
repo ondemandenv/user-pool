@@ -52,7 +52,7 @@ async function main() {
     try {
         await webUi.buildWebUiAndDeploy()
     } catch (e) {
-        console.error(`appsync not deployed, and /odmd-share ... not ready ?` + e)
+        console.error(`appsync not deployed, and /odmd-share ... not ready ?:` + e)
     }
 }
 
