@@ -20,6 +20,7 @@ import {PolicyStatement} from "aws-cdk-lib/aws-iam";
 import * as cr from 'aws-cdk-lib/custom-resources';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import {AwsSdkCall} from "aws-cdk-lib/custom-resources/lib/aws-custom-resource/aws-custom-resource";
+import {GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET} from "../bin/user-pool";
 
 export class UserPoolStack extends cdk.Stack {
 
@@ -81,8 +82,8 @@ export class UserPoolStack extends cdk.Stack {
 
         oauthUserpoolClient.node.addDependency(new UserPoolIdentityProviderGoogle(this, 'GoogleProvider', {
             userPool,
-            clientId: '425156547044-a8gnro92fhtf6shstfrune7oc8i6i0hf.apps.googleusercontent.com',
-            clientSecretValue: SecretValue.secretsManager('google_oauth_client_secret'),
+            clientId: GOOGLE_OAUTH_CLIENT_ID,
+            clientSecretValue: SecretValue.secretsManager(GOOGLE_OAUTH_CLIENT_SECRET ),
             scopes: ['email', 'profile', 'openid'],
 
             attributeMapping: {

@@ -10,6 +10,9 @@ import {WebUiStack} from "../lib/web-ui-stack";
 
 const app = new cdk.App();
 
+export const GOOGLE_OAUTH_CLIENT_ID= '425156547044-a8gnro92fhtf6shstfrune7oc8i6i0hf.apps.googleusercontent.com'
+export const GOOGLE_OAUTH_CLIENT_SECRET= 'google_oauth_client_secret'
+
 
 async function main() {
 
